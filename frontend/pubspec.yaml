@@ -1,0 +1,24 @@
+﻿name: zhongyi_zhiban
+description: 中医智伴 - 中医治疗方案查询与分享平台
+publish_to: 'none'
+version: 1.0.0+1
+
+environment:
+  sdk: '>=3.0.0 <4.0.0'
+
+dependencies:
+  flutter:
+    sdk: flutter
+  dio: ^5.4.0
+  provider: ^6.1.1
+  go_router: ^13.0.0
+  shared_preferences: ^2.2.2
+  cached_network_image: ^3.3.1
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^3.0.1
+
+flutter:
+  uses-material-design: true

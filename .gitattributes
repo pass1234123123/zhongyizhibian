@@ -1,0 +1,40 @@
+# Auto-detect text files and normalize to LF
+* text=auto
+
+# Python source
+*.py   text diff=python
+*.pyw  text
+
+# PHP backend
+*.php  text diff=php
+
+# Dart / Flutter
+*.dart text diff=dart
+*.yaml text
+*.yml  text
+
+# Markdown
+*.md   text diff=markdown
+
+# HTML / JS / CSS
+*.html text diff=html
+*.js   text
+*.css  text
+
+# Config
+*.cfg  text
+*.conf text
+*.ini  text
+*.toml text
+
+# Binaries (don't touch)
+*.png  binary
+*.jpg  binary
+*.jpeg binary
+*.gif  binary
+*.ico  binary
+*.svg  text
+*.woff binary
+*.woff2 binary
+*.ttf  binary
+*.eot  binary

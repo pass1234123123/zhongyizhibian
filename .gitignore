@@ -1,0 +1,83 @@
+# Dependencies
+vendor/
+node_modules/
+.flutter-plugins
+.flutter-plugins-dependencies
+.packages
+
+# Build
+dist/
+build/
+.dart_tool/
+*.apk
+*.aab
+*.ipa
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+*.iml
+*.iws
+.idea_modules/
+*.hprof
+
+# OS
+.DS_Store
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+
+# Environment
+.env
+.env.local
+*.bak
+
+# Temp
+*.log
+.cache/
+tmp/
+temp/
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+*.egg-info/
+*.egg
+.Python
+env/
+venv/
+.venv/
+pip-log.txt
+pip-delete-this-directory.txt
+.tox/
+.mypy_cache/
+.pytest_cache/
+.ruff_cache/
+
+# Database (runtime artifacts, not schema)
+*.db
+*.sqlite
+*.sqlite3
+
+# Uploads (user-generated content, keep only .gitkeep)
+uploads/*
+!uploads/.gitkeep
+
+# Flutter / Dart
+frontend/.dart_tool/
+frontend/.packages
+frontend/.flutter-plugins
+frontend/.flutter-plugins-dependencies
+frontend/build/
+frontend/android/.gradle/
+frontend/android/local.properties
+frontend/ios/Pods/
+frontend/ios/.symlinks/
+frontend/ios/Flutter/Flutter.framework
+frontend/ios/Flutter/Flutter.podspec
+frontend/ios/Runner.xcworkspace/
