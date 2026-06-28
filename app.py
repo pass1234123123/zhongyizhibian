@@ -1,4 +1,4 @@
-﻿import os
+import os
 import json
 import hashlib
 import uuid
@@ -11,6 +11,7 @@ import jwt
 
 from config import SECRET_KEY, JWT_EXPIRATION_HOURS, UPLOAD_FOLDER
 from models import get_db, init_db, seed_data
+from ai_processor import extract_text_from_file, call_deepseek, process_and_insert
 
 app = Flask(__name__, template_folder='templates', static_folder='static')
 CORS(app, supports_credentials=True)
@@ -593,7 +594,26 @@ def upload_content():
                 'processing'))
     upload_id = db.execute('SELECT last_insert_rowid() as id').fetchone()['id']
     
-    # Simulate AI processing
+    # AI processing (use DeepSeek if configured)
+    settings = db.execute('SELECT * FROM ai_settings WHERE id=1').fetchone()
+    api_key = settings['api_key'] if settings else ''
+    if api_key:
+        try:
+            from ai_processor import call_deepseek
+            ai_text_for_result = content[:2000] if content else 'file content'
+            ai_dict = call_deepseek(ai_text_for_result, api_key, settings.get('model', 'deepseek-chat'), settings.get('api_url', ''))
+            if 'error' not in ai_dict:
+                from ai_processor import process_and_insert
+                db2 = get_db()
+                process_and_insert(db2, ai_dict, user_id)
+                db2.close()
+                new_status = 'approved' if settings.get('auto_approve', 1) else 'pending'
+                db.execute('UPDATE uploads SET ai_result=?, status=? WHERE id=?', (json.dumps(ai_dict, ensure_ascii=False), new_status, upload_id))
+                db.commit()
+                db.close()
+                return jsonify({'message': '上传成功，AI已自动处理并入库！', 'upload_id': upload_id, 'status': new_status, 'auto_approved': bool(settings.get('auto_approve', 1))})
+        except Exception as ex:
+            pass
     ai_result = json.dumps({
         'title': '上传内容（AI自动提取）',
         'disease_ids': [],
@@ -876,6 +896,31 @@ def admin_member_applications():
     return jsonify([dict(r) for r in apps])
 
 
+
+# --- Admin: AI Settings ---
+@app.route("/api/admin/ai/settings", methods=["GET", "POST"])
+@admin_required
+def admin_ai_settings():
+    if request.method == "POST":
+        data = get_json_body()
+        db = get_db()
+        for k in ("api_key", "model", "api_url"):
+            v = data.get(k)
+            if v is not None:
+                db.execute('UPDATE ai_settings SET ' + k + '=? WHERE id=1', (v,))
+        v = data.get('auto_approve')
+        if v is not None:
+            db.execute('UPDATE ai_settings SET auto_approve=? WHERE id=1', (1 if v else 0,))
+        db.execute("UPDATE ai_settings SET updated_at=datetime('now') WHERE id=1")
+        db.commit()
+        db.close()
+        return jsonify({"message": "AI设置已更新"})
+    db = get_db()
+    s = db.execute("SELECT * FROM ai_settings WHERE id=1").fetchone()
+    db.close()
+    if not s:
+        return jsonify({"api_key": "", "model": "deepseek-chat", "api_url": "https://api.deepseek.com/v1/chat/completions", "auto_approve": 1})
+    return jsonify(dict(s))
 # ─── Init & Run ────────────────────────────────────────────────
 if __name__ == '__main__':
     init_db()

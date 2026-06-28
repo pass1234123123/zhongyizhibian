@@ -1,0 +1,28 @@
+{
+  "name": "中医智伴",
+  "short_name": "中医智伴",
+  "description": "中医治疗方案查询与分享平台",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#FAF7F2",
+  "theme_color": "#C23B22",
+  "orientation": "portrait",
+  "icons": [
+    { "src": "/static/icon-192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "/static/icon-512.png", "sizes": "512x512", "type": "image/png" }
+  ]
+}
+{
+  "name": "\u4e2d\u533b\u667a\u4f34",
+  "short_name": "\u4e2d\u533b\u667a\u4f34",
+  "description": "\u4e2d\u533b\u6cbb\u7597\u65b9\u6848\u67e5\u8be2\u4e0e\u5206\u4eab\u5e73\u53f0",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#FAF7F2",
+  "theme_color": "#C23B22",
+  "orientation": "portrait",
+  "icons": [
+    { "src": "/static/icon-192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "/static/icon-512.png", "sizes": "512x512", "type": "image/png" }
+  ]
+}

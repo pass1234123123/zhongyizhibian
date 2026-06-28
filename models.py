@@ -45,6 +45,18 @@ def init_db():
     FOREIGN KEY (user_id) REFERENCES users(id)
     );
 
+    -- AI settings for DeepSeek integration
+    CREATE TABLE IF NOT EXISTS ai_settings (
+        id INTEGER PRIMARY KEY DEFAULT 1,
+        provider TEXT DEFAULT 'deepseek',
+        api_key TEXT DEFAULT '',
+        model TEXT DEFAULT 'deepseek-chat',
+        api_url TEXT DEFAULT 'https://api.deepseek.com/v1/chat/completions',
+        auto_approve INTEGER DEFAULT 1,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    );
+
     -- Member settings (global, singleton row)
     CREATE TABLE IF NOT EXISTS member_settings (
         id INTEGER PRIMARY KEY DEFAULT 1,
@@ -379,6 +391,7 @@ def seed_data():
 
     # Seed default member settings
     c.execute('INSERT OR IGNORE INTO member_settings (id, annual_fee, free_duration_days) VALUES (1, 199.00, 365)')
+    c.execute('INSERT OR IGNORE INTO ai_settings (id, provider, api_key, model, auto_approve) VALUES (1, "deepseek", "", "deepseek-chat", 1)')
     
     conn.commit()
     conn.close()

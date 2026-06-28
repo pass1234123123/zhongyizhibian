@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<widget id="com.zhongyi.zhiban" version="1.0.0" xmlns="http://www.w3.org/ns/widgets" xmlns:cdv="http://cordova.apache.org/ns/1.0">
+    <name>中医智伴</name>
+    <description>中医智伴 - 中医治疗方案查询与分享平台</description>
+    <author email="dev@zhongyizhiban.app" href="https://zhongyizhiban.app">中医智伴团队</author>
+    <content src="index.html" />
+    <allow-intent href="http://*/*" />
+    <allow-intent href="https://*/*" />
+    <access origin="http://192.168.11.138:*" />
+    <access origin="http://*" />
+    <preference name="Orientation" value="portrait" />
+    <preference name="SplashScreenDelay" value="0" />
+    <preference name="FadeSplashScreen" value="false" />
+    <preference name="ShowSplashScreen" value="false" />
+</widget>

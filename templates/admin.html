@@ -71,6 +71,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei
     <button class="tab" data-tab="tabMembers" onclick="switchTab(this)">会员管理</button>
     <button class="tab" data-tab="tabSettings" onclick="switchTab(this)">系统设置</button>
     <button class="tab" data-tab="tabApplications" onclick="switchTab(this)">申请审核</button>
+    <button class="tab" data-tab="tabAISettings" onclick="switchTab(this)">AI设置</button>
   </div>
 
   <!-- Tab: Content Review -->
@@ -94,6 +95,25 @@ body{font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei
       <label>会员时长（天）</label>
       <input type="number" id="memberDays" value="365">
       <button class="btn-primary" onclick="saveAdminSettings()">保存设置</button>
+    </div>
+  </div>
+
+  <!-- Tab: Applications -->
+  <div class="tab-content" id="tabAISettings">
+    <div class="section-title">AI 大模型设置</div>
+    <div class="settings-group">
+      <label>API Key</label>
+      <input type="password" id="aiApiKey" placeholder="请输入DeepSeek API Key">
+      <label>模型</label>
+      <input type="text" id="aiModel" value="deepseek-chat">
+      <label>API 地址</label>
+      <input type="text" id="aiApiUrl" value="https://api.deepseek.com/v1/chat/completions">
+      <label>
+        <input type="checkbox" id="aiAutoApprove" checked>
+        自动审核通过（AI识别后直接发布，无需人工审核）
+      </label>
+      <br><br>
+      <button class="btn-primary" onclick="saveAISettings()">保存 AI 设置</button>
     </div>
   </div>
 
@@ -130,7 +150,7 @@ async function adminLogin(){
     token=r.token;
     document.getElementById('loginScreen').style.display='none';
     document.getElementById('dashboard').style.display='block';
-    loadPending();loadMemberSettings();loadMemberList();loadApplications();
+    loadPending();loadMemberSettings();loadMemberList();loadApplications();loadAISettings();
   }catch(e){err.textContent=e.message;err.style.display='block';}
 }
 
@@ -145,6 +165,7 @@ function switchTab(el){
   if(el.dataset.tab==='tabMembers') loadMemberList();
   if(el.dataset.tab==='tabSettings') loadMemberSettings();
   if(el.dataset.tab==='tabApplications') loadApplications();
+  if(el.dataset.tab==='tabAISettings') loadAISettings();
 }
 
 /* Content Review */

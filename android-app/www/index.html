@@ -226,13 +226,13 @@
         <div class="menu-item" onclick="showPage('pageMember');loadMemberStatus()">
           <span class="menu-icon">⭐</span><span class="menu-label">会员中心</span><span class="menu-value" id="profileMemberInfo">-</span><span class="menu-arrow">></span>
         </div>
-        <div class="menu-item" onclick="showPage('pagePurchases');loadPurchases()">
+        <div class="menu-item" onclick="showToast('功能开发中')">
           <span class="menu-icon">📦</span><span class="menu-label">我的已购</span><span class="menu-arrow">></span>
         </div>
-        <div class="menu-item" onclick="showPage('pagePoints');loadPoints()">
+        <div class="menu-item" onclick="showToast('功能开发中')">
           <span class="menu-icon">🏆</span><span class="menu-label">积分中心</span><span class="menu-arrow">></span>
         </div>
-        <div class="menu-item" onclick="showPage('pageMyUploads');loadMyUploads()">
+        <div class="menu-item" onclick="showToast('功能开发中')">
           <span class="menu-icon">📤</span><span class="menu-label">我的上传</span><span class="menu-arrow">></span>
         </div>
           <span class="menu-icon">⭐</span><span class="menu-label">会员管理</span><span class="menu-arrow">></span>
@@ -257,42 +257,6 @@
 </div>
 
 <!-- ===== ADMIN ===== -->
-<!-- ===== MY PURCHASES ===== -->
-<div class="page" id="pagePurchases">
-  <div class="app-header">
-    <button class="header-back" onclick="showPage('pageProfile');renderProfile()">← 返回</button>
-    <span class="brand-text" style="color:white"><h1 style="font-size:16px">我的已购</h1></span>
-    <span></span>
-  </div>
-  <div id="purchasesList"></div>
-</div>
-
-<!-- ===== POINTS CENTER ===== -->
-<div class="page" id="pagePoints">
-  <div class="app-header">
-    <button class="header-back" onclick="showPage('pageProfile');renderProfile()">← 返回</button>
-    <span class="brand-text" style="color:white"><h1 style="font-size:16px">积分中心</h1></span>
-    <span></span>
-  </div>
-  <div class="profile-card" id="pointsHeader" style="display:none">
-    <div class="profile-name">当前积分</div>
-    <div class="profile-role" style="font-size:28px;font-weight:700" id="pointsBalance">0</div>
-  </div>
-  <div class="section-header"><h2>积分流水</h2></div>
-  <div id="pointsLogList"></div>
-</div>
-
-<!-- ===== MY UPLOADS ===== -->
-<div class="page" id="pageMyUploads">
-  <div class="app-header">
-    <button class="header-back" onclick="showPage('pageProfile');renderProfile()">← 返回</button>
-    <span class="brand-text" style="color:white"><h1 style="font-size:16px">我的上传</h1></span>
-    <span></span>
-  </div>
-  <div class="section-header"><h2>上传记录</h2></div>
-  <div id="myUploadsList"></div>
-</div>
-
 <div class="page" id="pageAdmin">
   <div class="app-header">
     <button class="header-back" onclick="showPage('pageProfile');renderProfile()">← 返回</button>
@@ -454,53 +418,3 @@ document.addEventListener('DOMContentLoaded',function(){
 });
 </script>
 </body></html>
-/* NEW PAGES: Purchases, Points, MyUploads */
-async function loadPurchases() {
-  var el=document.getElementById('purchasesList'); if(!el) return;
-  try {
-    var items=await api('/api/purchases');
-    if(!items.length){showEmpty(el,'\U0001f4e6','\u5c1a\u65e0\u8d2d\u4e70\u8bb0\u5f55','\u67e5\u770b\u6cbb\u7597\u65b9\u6848\u540e\u53ef\u4ee5\u8d2d\u4e70');return;}
-    var h=[];
-    for(var i=0;i<items.length;i++){
-      var r=items[i];
-      h.push('<div class="treatment-card"><div class="card-header"><div class="card-title">'+esc(r.title)+'</div><div class="card-price">\u00a5'+r.price+'</div></div><div class="card-meta"><span>\u8d2d\u4e70\u65f6\u95f4: '+esc(r.created_at||'')+'</span></div></div>');
-    }
-    el.innerHTML=h.join('');
-  }catch(e){showEmpty(el,'\U0001f50d','\u52a0\u8f7d\u5931\u8d25','');}
-}
-
-async function loadPoints() {
-  var elp=document.getElementById('pointsBalance'); if(elp) elp.textContent=user?user.points||0:0;
-  var el=document.getElementById('pointsLogList'); if(!el) return;
-  try {
-    var logs=await api('/api/points/log');
-    if(!logs.length){showEmpty(el,'\U0001f3c6','\u6682\u65e0\u79ef\u5206\u6d41\u6c34','\u63d0\u4ea4\u53cd\u9988\u3001\u4e0a\u4f20\u5185\u5bb9\u53ef\u83b7\u5f97\u79ef\u5206');return;}
-    var h=[];
-    for(var i=0;i<logs.length;i++){
-      var r=logs[i];
-      var icon=r.amount>0?'\u2705':'\U0001f4a5';
-      var color=r.amount>0?'#4CAF50':'#E53935';
-      h.push('<div class="treatment-card" style="padding:12px 14px"><div style="display:flex;align-items:center;gap:10px"><div style="font-size:20px">'+icon+'</div><div style="flex:1"><div style="font-size:13px;font-weight:500">'+esc(r.note||'')+'</div><div style="font-size:11px;color:#999">'+esc(r.created_at||'')+'</div></div><div style="font-size:16px;font-weight:700;color:'+color+'">'+(r.amount>0?'+':'')+r.amount+'</div></div></div>');
-    }
-    el.innerHTML=h.join('');
-  }catch(e){}
-}
-
-async function loadMyUploads() {
-  var el=document.getElementById('myUploadsList'); if(!el) return;
-  try {
-    var uploads=await api('/api/uploads');
-    if(!uploads.length){showEmpty(el,'\U0001f4e4','\u6682\u65e0\u4e0a\u4f20\u8bb0\u5f55','\u4e0a\u4f20\u5185\u5bb9\u540e\u5c06\u5728\u6b64\u663e\u793a');return;}
-    var h=[];
-    for(var i=0;i<uploads.length;i++){
-      var r=uploads[i];
-      var icon=r.status==='approved'?'\u2705':r.status==='rejected'?'\u274c':'\u23f3';
-      var badge=r.status==='approved'?'badge-approved':r.status==='rejected'?'badge-rejected':'badge-pending';
-      var label=r.status==='approved'?'\u5df2\u53d1\u5e03':r.status==='rejected'?'\u5df2\u9a73\u56de':'\u5f85\u5ba1\u6838';
-      var title=(r.ai_result&&r.ai_result.title)?r.ai_result.title:'\u4e0a\u4f20\u5185\u5bb9';
-      h.push('<div class="treatment-card" style="padding:12px 14px"><div style="display:flex;align-items:center;gap:10px"><div style="font-size:22px">'+icon+'</div><div style="flex:1"><div style="font-size:13px;font-weight:500">'+esc(title)+'</div><div style="font-size:11px;color:#999">'+esc(r.created_at||'')+'</div></div><span class="badge '+badge+'">'+label+'</span></div></div>');
-    }
-    el.innerHTML=h.join('');
-  }catch(e){}
-}
-</script>
