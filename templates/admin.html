@@ -1,0 +1,214 @@
+<!DOCTYPE html><html lang="zh-CN"><head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>中医智伴 - 管理后台</title>
+<style>
+:root{--primary:#C23B22;--primary-dark:#A0311C;--primary-light:#F5E6E2;--bg:#FAF7F2;--card:#fff;--text:#2D2D2D;--text2:#666;--text3:#999;--success:#4CAF50;--warn:#FF9800;--error:#E53935;--radius:8px;--shadow:0 2px 8px rgba(0,0,0,0.06)}
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif;background:var(--bg);color:var(--text);min-height:100vh;line-height:1.6}
+
+.header{background:linear-gradient(135deg,var(--primary),var(--primary-dark));color:#fff;padding:16px 24px;display:flex;justify-content:space-between;align-items:center}
+.header h1{font-size:18px;font-weight:700}
+.header .logout-btn{background:rgba(255,255,255,0.2);border:none;color:#fff;padding:6px 16px;border-radius:20px;cursor:pointer;font-family:inherit;font-size:13px}
+
+.login-screen{max-width:360px;margin:80px auto;padding:24px;text-align:center}
+.login-screen h2{font-size:22px;margin-bottom:24px}
+.login-screen input{width:100%;padding:10px 14px;margin-bottom:12px;border:1px solid #ddd;border-radius:var(--radius);font-size:14px;outline:none;font-family:inherit}
+.login-screen input:focus{border-color:var(--primary)}
+.login-btn{width:100%;padding:12px;background:var(--primary);color:#fff;border:none;border-radius:var(--radius);font-size:15px;font-weight:600;cursor:pointer;font-family:inherit}
+
+.tabs{display:flex;background:#fff;border-bottom:1px solid #eee;position:sticky;top:0;z-index:10}
+.tab{flex:1;padding:14px;text-align:center;cursor:pointer;font-size:13px;color:var(--text2);border-bottom:2px solid transparent;transition:all 0.2s;background:none;border-top:none;border-left:none;border-right:none;font-family:inherit}
+.tab:hover{color:var(--primary);background:var(--primary-light)}
+.tab.active{color:var(--primary);border-bottom-color:var(--primary);font-weight:600}
+
+.tab-content{display:none;padding:16px}
+.tab-content.active{display:block}
+
+.section-title{font-size:15px;font-weight:600;margin:16px 0 12px;color:var(--text)}
+
+.admin-card{background:var(--card);border-radius:var(--radius);padding:16px;margin-bottom:8px;box-shadow:var(--shadow)}
+.admin-card .card-title{font-size:14px;font-weight:600}
+.admin-card .card-meta{font-size:12px;color:var(--text2);margin:4px 0}
+.admin-card .card-body{font-size:12px;color:var(--text2);max-height:60px;overflow:hidden;line-height:1.5;margin:6px 0}
+.admin-card .card-actions{display:flex;gap:8px;margin-top:8px}
+
+.btn-approve{background:#E8F5E9;color:#2E7D32;border:none;padding:8px 20px;border-radius:20px;font-size:13px;cursor:pointer;font-family:inherit}
+.btn-reject{background:#FFEBEE;color:#C62828;border:none;padding:8px 20px;border-radius:20px;font-size:13px;cursor:pointer;font-family:inherit}
+.btn-primary{background:var(--primary);color:#fff;border:none;padding:10px 24px;border-radius:20px;font-size:14px;cursor:pointer;font-family:inherit}
+
+.settings-group{background:var(--card);border-radius:var(--radius);padding:16px;margin-bottom:12px;box-shadow:var(--shadow)}
+.settings-group label{display:block;font-size:13px;color:var(--text2);margin-bottom:4px}
+.settings-group input{width:100%;padding:8px 12px;border:1px solid #ddd;border-radius:6px;font-size:14px;margin-bottom:10px;outline:none;font-family:inherit}
+.settings-group input:focus{border-color:var(--primary)}
+
+.toast{position:fixed;top:24px;left:50%;transform:translateX(-50%);background:rgba(45,45,45,0.92);color:#fff;padding:10px 24px;border-radius:20px;font-size:13px;z-index:9999;opacity:0;transition:opacity 0.25s;pointer-events:none}
+.toast.show{opacity:1}
+
+.empty-state{text-align:center;padding:40px 20px;color:var(--text3);font-size:14px}
+.error-msg{color:var(--error);font-size:13px;margin-top:8px;display:none}
+</style>
+</head><body>
+<div class="toast" id="toast"></div>
+
+<!-- Login Screen -->
+<div id="loginScreen" class="login-screen">
+  <h2>管理后台登录</h2>
+  <input type="text" id="adminPhone" placeholder="手机号" value="13800000000">
+  <input type="password" id="adminPassword" placeholder="密码" value="admin123">
+  <div class="error-msg" id="loginError"></div>
+  <button class="login-btn" onclick="adminLogin()">登录</button>
+</div>
+
+<!-- Dashboard -->
+<div id="dashboard" style="display:none">
+  <div class="header">
+    <h1>中医智伴 · 管理后台</h1>
+    <button class="logout-btn" onclick="adminLogout()">退出登录</button>
+  </div>
+
+  <div class="tabs">
+    <button class="tab active" data-tab="tabReview" onclick="switchTab(this)">内容审核</button>
+    <button class="tab" data-tab="tabMembers" onclick="switchTab(this)">会员管理</button>
+    <button class="tab" data-tab="tabSettings" onclick="switchTab(this)">系统设置</button>
+    <button class="tab" data-tab="tabApplications" onclick="switchTab(this)">申请审核</button>
+  </div>
+
+  <!-- Tab: Content Review -->
+  <div class="tab-content active" id="tabReview">
+    <div class="section-title">待审核内容</div>
+    <div id="pendingList"></div>
+  </div>
+
+  <!-- Tab: Members -->
+  <div class="tab-content" id="tabMembers">
+    <div class="section-title">会员列表</div>
+    <div id="memberList"></div>
+  </div>
+
+  <!-- Tab: Settings -->
+  <div class="tab-content" id="tabSettings">
+    <div class="section-title">会员设置</div>
+    <div class="settings-group">
+      <label>年费（元）</label>
+      <input type="number" id="memberFee" value="199">
+      <label>会员时长（天）</label>
+      <input type="number" id="memberDays" value="365">
+      <button class="btn-primary" onclick="saveAdminSettings()">保存设置</button>
+    </div>
+  </div>
+
+  <!-- Tab: Applications -->
+  <div class="tab-content" id="tabApplications">
+    <div class="section-title">贡献者续期申请</div>
+    <div id="appList"></div>
+  </div>
+</div>
+
+<script>
+var token='';
+function t(m){var o=document.getElementById('toast');o.textContent=m;o.classList.add('show');clearTimeout(o._timer);o._timer=setTimeout(function(){o.classList.remove('show');},2000);}
+function esc(v){return String(v==null?'':v).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];});}
+
+async function api(path,opts){
+  var headers={'Content-Type':'application/json'};
+  if(token) headers['Authorization']='Bearer '+token;
+  var conf={headers:headers};
+  if(opts){if(opts.method) conf.method=opts.method;if(opts.body) conf.body=JSON.stringify(opts.body);}
+  var resp=await fetch(path,conf);
+  var data=await resp.json();
+  if(!resp.ok && data.error) throw new Error(data.error);
+  return data;
+}
+
+async function adminLogin(){
+  var phone=document.getElementById('adminPhone').value.trim();
+  var password=document.getElementById('adminPassword').value;
+  var err=document.getElementById('loginError');
+  try{
+    var r=await api('/api/auth/login',{method:'POST',body:{phone:phone,password:password}});
+    if(r.user.role!=='admin'){err.textContent='该账号非管理员';err.style.display='block';return;}
+    token=r.token;
+    document.getElementById('loginScreen').style.display='none';
+    document.getElementById('dashboard').style.display='block';
+    loadPending();loadMemberSettings();loadMemberList();loadApplications();
+  }catch(e){err.textContent=e.message;err.style.display='block';}
+}
+
+function adminLogout(){token='';document.getElementById('loginScreen').style.display='block';document.getElementById('dashboard').style.display='none';}
+
+function switchTab(el){
+  document.querySelectorAll('.tab').forEach(function(t){t.classList.remove('active');});
+  document.querySelectorAll('.tab-content').forEach(function(c){c.classList.remove('active');});
+  el.classList.add('active');
+  document.getElementById(el.dataset.tab).classList.add('active');
+  if(el.dataset.tab==='tabReview') loadPending();
+  if(el.dataset.tab==='tabMembers') loadMemberList();
+  if(el.dataset.tab==='tabSettings') loadMemberSettings();
+  if(el.dataset.tab==='tabApplications') loadApplications();
+}
+
+/* Content Review */
+async function loadPending(){
+  var el=document.getElementById('pendingList');
+  try{
+    var pending=await api('/api/admin/pending?status=pending');
+    if(!pending.length){el.innerHTML='<div class="empty-state">暂无待审核内容</div>';return;}
+    var h=[];
+    for(var i=0;i<pending.length;i++){
+      var r=pending[i];
+      h.push('<div class="admin-card"><div class="card-title">'+esc((r.ai_result&&r.ai_result.title)||'待审核内容')+'</div><div class="card-meta">上传者: '+esc(r.uploader_name||'')+' | '+esc(r.created_at||'')+'</div><div class="card-body">'+esc((r.content||'').substring(0,200))+'</div><div class="card-actions"><button class="btn-approve" onclick="approve('+r.id+')">通过</button><button class="btn-reject" onclick="reject('+r.id+')">驳回</button></div></div>');
+    }
+    el.innerHTML=h.join('');
+  }catch(e){el.innerHTML='<div class="empty-state">加载失败</div>';}
+}
+async function approve(id){try{await api('/api/admin/review',{method:'POST',body:{upload_id:id,action:'approve'}});t('已通过');loadPending();}catch(e){t(e.message);}}
+async function reject(id){var r=prompt('驳回理由：');if(!r)return;try{await api('/api/admin/review',{method:'POST',body:{upload_id:id,action:'reject',review_note:r}});t('已驳回');loadPending();}catch(e){t(e.message);}}
+
+/* Members */
+async function loadMemberList(){
+  var el=document.getElementById('memberList');
+  try{
+    var members=await api('/api/admin/member/list');
+    if(!members.length){el.innerHTML='<div class="empty-state">暂无会员</div>';return;}
+    var h=[];
+    for(var i=0;i<members.length;i++){
+      var m=members[i];
+      h.push('<div class="admin-card"><div class="card-title">'+esc(m.username)+'</div><div class="card-meta">手机: '+esc(m.phone)+' | 类型: '+esc(m.type)+' | 状态: '+esc(m.status)+'</div><div class="card-meta">到期: '+(m.end_date?m.end_date.substring(0,10):'-')+'</div></div>');
+    }
+    el.innerHTML=h.join('');
+  }catch(e){el.innerHTML='<div class="empty-state">加载失败</div>';}
+}
+
+/* Settings */
+async function loadMemberSettings(){
+  try{
+    var s=await api('/api/admin/member/settings');
+    document.getElementById('memberFee').value=s.annual_fee;
+    document.getElementById('memberDays').value=s.free_duration_days;
+  }catch(e){}
+}
+async function saveAdminSettings(){
+  try{
+    var r=await api('/api/admin/member/settings',{method:'POST',body:{annual_fee:parseFloat(document.getElementById('memberFee').value),free_duration_days:parseInt(document.getElementById('memberDays').value)}});
+    t(r.message);
+  }catch(e){t(e.message);}
+}
+
+/* Applications */
+async function loadApplications(){
+  var el=document.getElementById('appList');
+  try{
+    var apps=await api('/api/admin/member/applications');
+    if(!apps.length){el.innerHTML='<div class="empty-state">暂无申请</div>';return;}
+    var h=[];
+    for(var i=0;i<apps.length;i++){
+      var a=apps[i];
+      h.push('<div class="admin-card"><div class="card-title">'+esc(a.username)+'</div><div class="card-meta">类型: '+esc(a.type)+' | 状态: '+esc(a.status)+'</div>'+(a.status==='pending'?'<div class="card-actions"><button class="btn-approve" onclick="appApprove('+a.id+')">批准</button><button class="btn-reject" onclick="appReject('+a.id+')">拒绝</button></div>':'')+'</div>');
+    }
+    el.innerHTML=h.join('');
+  }catch(e){el.innerHTML='<div class="empty-state">加载失败</div>';}
+}
+async function appApprove(id){try{await api('/api/admin/member/applications',{method:'POST',body:{application_id:id,action:'approve'}});t('已批准');loadApplications();loadMemberList();}catch(e){t(e.message);}}
+async function appReject(id){var r=prompt('驳回理由：');if(!r)return;try{await api('/api/admin/member/applications',{method:'POST',body:{application_id:id,action:'reject',review_note:r}});t('已驳回');loadApplications();}catch(e){t(e.message);}}
+</script>
+</body></html>

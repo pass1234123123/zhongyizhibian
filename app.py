@@ -58,6 +58,50 @@ def hash_password(password):
     return hashlib.sha256(password.encode()).hexdigest()
 
 
+def get_member_status(user_id):
+    db = get_db()
+    member = db.execute('''
+        SELECT m.*, ms.annual_fee FROM members m
+        LEFT JOIN member_settings ms ON ms.id=1
+        WHERE m.user_id=? AND m.status="active" AND m.end_date > datetime("now")
+    ''', (user_id,)).fetchone()
+    approved_count = db.execute(
+        'SELECT COUNT(*) as cnt FROM uploads WHERE user_id=? AND status="approved"',
+        (user_id,)).fetchone()['cnt']
+    today_views = db.execute(
+        'SELECT COUNT(*) as cnt FROM view_log WHERE user_id=? AND date(created_at)=date("now")',
+        (user_id,)).fetchone()['cnt']
+    settings = db.execute('SELECT * FROM member_settings WHERE id=1').fetchone()
+    db.close()
+    return {
+        'is_member': member is not None,
+        'member_type': member['type'] if member else None,
+        'member_end': member['end_date'] if member else None,
+        'member_status': member['status'] if member else None,
+        'approved_uploads': approved_count,
+        'today_views': today_views,
+        'annual_fee': settings['annual_fee'] if settings else 199.0,
+        'free_duration_days': settings['free_duration_days'] if settings else 365
+    }
+
+
+def can_view_full(user_id, treatment_id):
+    status = get_member_status(user_id)
+    if status['is_member']:
+        return True, '会员可查看全部内容'
+    # Non-member: track views and limit to 1
+    db = get_db()
+    existing = db.execute('SELECT id FROM view_log WHERE user_id=? AND treatment_id=?', (user_id, treatment_id)).fetchone()
+    if not existing:
+        db.execute('INSERT INTO view_log (user_id, treatment_id) VALUES (?,?)', (user_id, treatment_id))
+        db.commit()
+    db.close()
+    total = status['today_views']
+    if total < 1:
+        return True, '今日剩余1次免费查看'
+    return False, '非会员每日仅可查看1个方案，开通会员可查看全部'
+
+
 def get_json_body():
     return request.get_json(silent=True) or {}
 
@@ -73,6 +117,11 @@ def to_int(value, default=0):
 @app.route('/')
 def index():
     return render_template('index.html')
+
+
+@app.route('/admin')
+def admin_panel():
+    return render_template('admin.html')
 
 
 @app.route('/api/init', methods=['POST'])
@@ -260,8 +309,8 @@ def get_treatment_detail(treatment_id):
     
     # Check if user purchased
     user_id = request.current_user['user_id']
-    purchased = db.execute('SELECT id FROM purchases WHERE user_id=? AND treatment_id=?', (user_id, treatment_id)).fetchone()
-    is_purchased = purchased is not None
+    can_view, view_msg = can_view_full(user_id, treatment_id)
+    member_status = get_member_status(user_id)
     
     types = [r['type_name'] for r in db.execute('SELECT type_name FROM treatment_type_relations WHERE treatment_id=?', (treatment_id,)).fetchall()]
     formulas = [dict(r) for r in db.execute('SELECT * FROM treatment_formulas WHERE treatment_id=?', (treatment_id,)).fetchall()]
@@ -274,12 +323,16 @@ def get_treatment_detail(treatment_id):
         'id': t['id'], 'title': t['title'], 'price': t['price'],
         'rating': t['rating'], 'feedback_count': t['feedback_count'],
         'effective_rate': t['effective_rate'], 'preview': t['preview'],
-        'types': types, 'is_special': bool(t['is_special']),
-        'is_purchased': is_purchased, 'is_favorited': fav is not None,
+        'types': types, 'is_special': bool(t['is_special']), 'is_favorited': fav is not None,
+        'can_view': can_view, 'view_msg': view_msg,
+        'is_member': member_status['is_member'],
+        'member_type': member_status['member_type'],
+        'member_end': member_status['member_end'],
+        'approved_uploads': member_status['approved_uploads'],
         'formulas': formulas, 'acupoints': acupoints
     }
     
-    if is_purchased or (t['price'] == 0):
+    if can_view:
         result['full_content'] = t['full_content']
     
     db.close()
@@ -296,11 +349,11 @@ def get_treatment_full(treatment_id):
         return jsonify({'error': '治疗方案不存在'}), 404
     
     user_id = request.current_user['user_id']
-    purchased = db.execute('SELECT id FROM purchases WHERE user_id=? AND treatment_id=?', (user_id, treatment_id)).fetchone()
+    can_view, view_msg = can_view_full(user_id, treatment_id)
     
-    if not purchased and t['price'] > 0:
+    if not can_view:
         db.close()
-        return jsonify({'error': '请先购买后查看完整内容', 'price': t['price']}), 403
+        return jsonify({'error': view_msg, 'can_view': False}), 403
     
     formulas = [dict(r) for r in db.execute('SELECT * FROM treatment_formulas WHERE treatment_id=?', (treatment_id,)).fetchall()]
     acupoints = [dict(r) for r in db.execute('SELECT * FROM treatment_acupoints WHERE treatment_id=?', (treatment_id,)).fetchall()]
@@ -334,12 +387,12 @@ def purchase_treatment():
         db.close()
         return jsonify({'error': '治疗方案不存在'}), 404
     
-    existing = db.execute('SELECT id FROM purchases WHERE user_id=? AND treatment_id=?', (user_id, treatment_id)).fetchone()
-    if existing:
+    can_view, view_msg = can_view_full(user_id, treatment_id)
+    if can_view:
         db.close()
-        return jsonify({'message': '您已购买过该方案', 'already_purchased': True})
+        return jsonify({'message': '已是会员可免费查看', 'already_purchased': True, 'is_member': True})
     
-    # Simulate payment
+    # Legacy: record purchase for non-members
     db.execute('INSERT INTO purchases (user_id, treatment_id, amount) VALUES (?,?,?)',
                (user_id, treatment_id, t['price']))
     
@@ -439,10 +492,12 @@ def submit_feedback():
     
     db = get_db()
     # Check purchase
+    member = db.execute('SELECT id FROM members WHERE user_id=? AND status="active" AND end_date > datetime("now")', (user_id,)).fetchone()
     purchased = db.execute('SELECT id FROM purchases WHERE user_id=? AND treatment_id=?', (user_id, treatment_id)).fetchone()
-    if not purchased:
+    viewed = db.execute('SELECT id FROM view_log WHERE user_id=? AND treatment_id=?', (user_id, treatment_id)).fetchone()
+    if not purchased and not member and not viewed:
         db.close()
-        return jsonify({'error': '请先购买后再提交反馈'}), 403
+        return jsonify({'error': '请先查看内容后再提交反馈'}), 403
     
     existing_fb = db.execute('SELECT id FROM feedbacks WHERE user_id=? AND treatment_id=?', (user_id, treatment_id)).fetchone()
     if existing_fb:
@@ -667,6 +722,158 @@ def get_points_log():
     logs = db.execute('SELECT * FROM points_log WHERE user_id=? ORDER BY created_at DESC LIMIT 100', (user_id,)).fetchall()
     db.close()
     return jsonify([dict(r) for r in logs])
+
+
+# ─── Member ────────────────────────────────────────────────────
+@app.route('/api/member/status', methods=['GET'])
+@token_required
+def member_status():
+    return jsonify(get_member_status(request.current_user['user_id']))
+
+
+@app.route('/api/member/apply', methods=['POST'])
+@token_required
+def member_apply():
+    data = get_json_body()
+    action = data.get('action')  # 'upgrade' or 'renewal'
+    user_id = request.current_user['user_id']
+    db = get_db()
+    status = get_member_status(user_id)
+    
+    if action == 'upgrade':
+        if status['is_member']:
+            db.close()
+            return jsonify({'message': '您已经是会员', 'is_member': True})
+        settings = db.execute('SELECT * FROM member_settings WHERE id=1').fetchone()
+        days = settings['free_duration_days'] if settings else 365
+        fee = settings['annual_fee'] if settings else 199.0
+        # Simulate payment
+        end_date = 'datetime("now", "+{} days")'.format(days)
+        db.execute('INSERT OR REPLACE INTO members (user_id, type, status, start_date, end_date) VALUES (?, "regular", "active", datetime("now"), {})'.format(end_date), (user_id,))
+        db.commit()
+        db.close()
+        return jsonify({'message': '会员开通成功！有效期{}天'.format(days), 'days': days, 'fee': fee})
+    
+    elif action == 'renewal':
+        if status['approved_uploads'] < 10:
+            db.close()
+            return jsonify({'error': '需要至少10个通过审核的上传内容才能申请贡献者会员'}), 400
+        existing = db.execute(
+            'SELECT id FROM member_applications WHERE user_id=? AND status="pending"',
+            (user_id,)).fetchone()
+        if existing:
+            db.close()
+            return jsonify({'message': '已提交过申请，等待审核'})
+        db.execute(
+            'INSERT INTO member_applications (user_id, type, status) VALUES (?, "contributor_renewal", "pending")',
+            (user_id,))
+        db.commit()
+        db.close()
+        return jsonify({'message': '申请已提交，等待管理员审核'})
+    
+    db.close()
+    return jsonify({'error': '无效操作'}), 400
+
+
+# ─── Admin: Member ─────────────────────────────────────────────
+@app.route('/api/admin/member/settings', methods=['GET', 'POST'])
+@admin_required
+def admin_member_settings():
+    if request.method == 'POST':
+        data = get_json_body()
+        fee = data.get('annual_fee')
+        days = data.get('free_duration_days')
+        db = get_db()
+        if fee is not None:
+            db.execute('UPDATE member_settings SET annual_fee=?, updated_at=datetime("now") WHERE id=1', (float(fee),))
+        if days is not None:
+            db.execute('UPDATE member_settings SET free_duration_days=?, updated_at=datetime("now") WHERE id=1', (int(days),))
+        db.commit()
+        db.close()
+        return jsonify({'message': '会员设置已更新'})
+    db = get_db()
+    settings = db.execute('SELECT * FROM member_settings WHERE id=1').fetchone()
+    db.close()
+    return jsonify(dict(settings) if settings else {'annual_fee': 199.0, 'free_duration_days': 365})
+
+
+@app.route('/api/admin/member/list', methods=['GET'])
+@admin_required
+def admin_member_list():
+    db = get_db()
+    members = db.execute('''
+        SELECT m.*, u.username, u.phone
+        FROM members m JOIN users u ON m.user_id=u.id
+        ORDER BY m.created_at DESC LIMIT 100
+    ''').fetchall()
+    db.close()
+    return jsonify([dict(r) for r in members])
+
+
+@app.route('/api/admin/member/add', methods=['POST'])
+@admin_required
+def admin_member_add():
+    data = get_json_body()
+    user_id = to_int(data.get('user_id'))
+    mem_type = data.get('type', 'regular')
+    days = to_int(data.get('days', 365))
+    db = get_db()
+    user = db.execute('SELECT id FROM users WHERE id=?', (user_id,)).fetchone()
+    if not user:
+        db.close()
+        return jsonify({'error': '用户不存在'}), 404
+    db.execute(
+        'INSERT OR REPLACE INTO members (user_id, type, status, start_date, end_date) VALUES (?, ?, "active", datetime("now"), datetime("now", "+{} days"))'.format(days),
+        (user_id, mem_type))
+    db.commit()
+    db.close()
+    return jsonify({'message': '已添加会员', 'user_id': user_id, 'type': mem_type, 'days': days})
+
+
+@app.route('/api/admin/member/applications', methods=['GET', 'POST'])
+@admin_required
+def admin_member_applications():
+    if request.method == 'POST':
+        data = get_json_body()
+        app_id = to_int(data.get('application_id'))
+        action = data.get('action')
+        note = data.get('review_note', '')
+        reviewer_id = request.current_user['user_id']
+        db = get_db()
+        app = db.execute('SELECT * FROM member_applications WHERE id=?', (app_id,)).fetchone()
+        if not app:
+            db.close()
+            return jsonify({'error': '申请不存在'}), 404
+        if app['status'] != 'pending':
+            db.close()
+            return jsonify({'error': '该申请已处理'}), 400
+        if action == 'approve':
+            settings = db.execute('SELECT * FROM member_settings WHERE id=1').fetchone()
+            days = settings['free_duration_days'] if settings else 365
+            db.execute(
+                'INSERT OR REPLACE INTO members (user_id, type, status, start_date, end_date) VALUES (?, "contributor", "active", datetime("now"), datetime("now", "+{} days"))'.format(days),
+                (app['user_id'],))
+            db.execute('UPDATE member_applications SET status="approved", review_note=?, reviewer_id=?, reviewed_at=datetime("now") WHERE id=?',
+                       (note, reviewer_id, app_id))
+            db.commit()
+            db.close()
+            return jsonify({'message': '申请通过，贡献者会员已开通', 'days': days})
+        elif action == 'reject':
+            db.execute('UPDATE member_applications SET status="rejected", review_note=?, reviewer_id=?, reviewed_at=datetime("now") WHERE id=?',
+                       (note, reviewer_id, app_id))
+            db.commit()
+            db.close()
+            return jsonify({'message': '申请已驳回', 'review_note': note})
+        db.close()
+        return jsonify({'error': '无效操作'}), 400
+    db = get_db()
+    apps = db.execute('''
+        SELECT a.*, u.username, u.phone
+        FROM member_applications a JOIN users u ON a.user_id=u.id
+        ORDER BY a.created_at DESC LIMIT 50
+    ''').fetchall()
+    db.close()
+    return jsonify([dict(r) for r in apps])
 
 
 # ─── Init & Run ────────────────────────────────────────────────

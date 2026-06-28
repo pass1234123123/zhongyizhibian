@@ -42,6 +42,49 @@ def init_db():
         source_id INTEGER DEFAULT 0,
         note TEXT DEFAULT '',
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (user_id) REFERENCES users(id)
+    );
+
+    -- Member settings (global, singleton row)
+    CREATE TABLE IF NOT EXISTS member_settings (
+        id INTEGER PRIMARY KEY DEFAULT 1,
+        annual_fee REAL DEFAULT 199.00,
+        free_duration_days INTEGER DEFAULT 365,
+        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    );
+
+    -- Members
+    CREATE TABLE IF NOT EXISTS members (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        user_id INTEGER NOT NULL UNIQUE,
+        type TEXT NOT NULL DEFAULT 'regular',
+        status TEXT NOT NULL DEFAULT 'active',
+        start_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        end_date TIMESTAMP,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        FOREIGN KEY (user_id) REFERENCES users(id)
+    );
+
+    -- Member renewal applications
+    CREATE TABLE IF NOT EXISTS member_applications (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        user_id INTEGER NOT NULL,
+        type TEXT NOT NULL DEFAULT 'contributor_renewal',
+        status TEXT NOT NULL DEFAULT 'pending',
+        review_note TEXT DEFAULT '',
+        reviewer_id INTEGER DEFAULT 0,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        reviewed_at TIMESTAMP,
+        FOREIGN KEY (user_id) REFERENCES users(id)
+    );
+
+    -- View log for non-member tracking
+    CREATE TABLE IF NOT EXISTS view_log (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        user_id INTEGER NOT NULL,
+        treatment_id INTEGER NOT NULL,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
         FOREIGN KEY (user_id) REFERENCES users(id)
     );
 
@@ -333,6 +376,9 @@ def seed_data():
     # Create default admin user
     password_hash = hashlib.sha256('admin123'.encode()).hexdigest()
     c.execute('INSERT OR IGNORE INTO users (id, phone, username, password_hash, role, points) VALUES (1, "13800000000", "管理员", ?, "admin", 9999)', (password_hash,))
+
+    # Seed default member settings
+    c.execute('INSERT OR IGNORE INTO member_settings (id, annual_fee, free_duration_days) VALUES (1, 199.00, 365)')
     
     conn.commit()
     conn.close()

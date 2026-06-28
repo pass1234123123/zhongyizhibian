@@ -1,576 +1,419 @@
-<!DOCTYPE html><html lang="zh-CN"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no"><title>中医智伴 - Demo</title><style>*{margin:0;padding:0;box-sizing:border-box}body{font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif;background:#f5f0eb;color:#333;max-width:420px;margin:0 auto;min-height:100vh}.header{background:linear-gradient(135deg,#8B3A3A,#A0522D);color:#fff;padding:18px 20px 14px;position:sticky;top:0;z-index:100;display:flex;justify-content:space-between;align-items:center}.header h1{font-size:20px;font-weight:600}.header p{font-size:12px;opacity:.8}.page{display:none;padding:0 0 70px;min-height:100vh;background:#f5f0eb}.page.active{display:block}.search-bar{margin:0 16px 14px;background:#fff;border-radius:10px;padding:10px 14px;display:flex;box-shadow:0 1px 4px rgba(0,0,0,.06)}.search-bar input{border:none;background:0;flex:1;font-size:14px;outline:0;color:#333}.search-bar .icon{color:#A0522D;margin-right:8px}.category-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;padding:0 16px;margin-bottom:16px}.cat-item{text-align:center;padding:12px 4px;background:#fff;border-radius:12px;box-shadow:0 1px 4px rgba(0,0,0,.06);cursor:pointer}.cat-item:active{transform:scale(.95)}.cat-icon{width:40px;height:40px;border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 6px;font-size:20px}.cat-name{font-size:12px;color:#5a3e36}.section-title{font-size:15px;font-weight:600;padding:18px 20px 10px;color:#5a3e36;display:flex;justify-content:space-between}.treatment-card{background:#fff;border-radius:12px;margin:0 16px 10px;padding:14px 16px;box-shadow:0 1px 4px rgba(0,0,0,.06);cursor:pointer}.treatment-card:active{transform:scale(.98)}.tc-header{display:flex;justify-content:space-between;align-items:flex-start}.tc-title{font-size:15px;font-weight:600;flex:1}.tc-price{color:#8B3A3A;font-weight:600;font-size:14px;white-space:nowrap;margin-left:8px}.tag{font-size:10px;padding:2px 8px;border-radius:10px;background:#f0e6de;color:#8B3A3A;display:inline-block;margin:2px 4px 2px 0}.tag-spec{background:#d4edda;color:#155724}.tc-meta{font-size:11px;color:#999;display:flex;gap:12px;flex-wrap:wrap}.back-btn{color:#A0522D;cursor:pointer;font-size:14px;padding:8px 0;border:none;background:0;font-family:inherit;display:inline-block}.sub-header{background:#fff;padding:14px 20px;margin:0 0 12px;box-shadow:0 1px 3px rgba(0,0,0,.04)}.sub-header .name{font-size:20px;font-weight:600}.sub-header .sub{font-size:13px;color:#888;margin-top:4px}.sub-header .stats{display:flex;gap:20px;margin-top:10px;padding-top:10px;border-top:1px solid #f0ebe6}.sub-header .stat{text-align:center}.sub-header .stat-num{font-size:18px;font-weight:600;color:#8B3A3A}.sub-header .stat-label{font-size:11px;color:#999}.preview-box{background:#fff;border-radius:12px;margin:0 16px 10px;padding:14px 16px;box-shadow:0 1px 4px rgba(0,0,0,.06)}.preview-box .label{font-size:12px;color:#A0522D;font-weight:600;margin-bottom:8px}.preview-box .text{font-size:13px;line-height:1.7;color:#555}.paywall{background:linear-gradient(135deg,#fff8f3,#fff);border:1.5px dashed #A0522D;border-radius:12px;margin:0 16px 12px;padding:20px;text-align:center}.paywall .price{font-size:26px;color:#8B3A3A;font-weight:700}.paywall .price span{font-size:14px;font-weight:400}.paywall .desc{font-size:12px;color:#888;margin:6px 0 14px}.pay-btn{background:linear-gradient(135deg,#8B3A3A,#A0522D);color:#fff;border:none;padding:12px 40px;border-radius:25px;font-size:15px;cursor:pointer;font-weight:600;max-width:240px;width:100%;font-family:inherit}.pay-btn:active{transform:scale(.97)}.pay-btn.sm{padding:8px 24px;font-size:13px;width:auto}.feedback-section{margin:16px}.fb-summary{background:#fff;border-radius:12px;padding:14px 16px;margin-bottom:10px;box-shadow:0 1px 4px rgba(0,0,0,.06)}.fb-stats{display:flex;gap:16px;align-items:center}.fb-avg{font-size:28px;font-weight:700;color:#8B3A3A}.fb-avg small{font-size:14px;color:#999}.fb-bar-item{display:flex;align-items:center;gap:6px;margin-bottom:3px;font-size:11px;color:#666}.fb-bar-track{flex:1;height:6px;background:#eee;border-radius:3px;overflow:hidden}.fb-bar-fill{height:100%;background:#A0522D}.fb-item{background:#fff;border-radius:12px;padding:14px 16px;margin-bottom:8px;box-shadow:0 1px 4px rgba(0,0,0,.06)}.fb-stars{color:#E6A817;font-size:14px}.fb-text{font-size:13px;color:#555;line-height:1.6}.fb-meta{font-size:11px;color:#999;margin-top:6px;display:flex;gap:10px}.upload-box{background:#fff;border:2px dashed #ccc;border-radius:16px;margin:12px 16px;padding:40px 20px;text-align:center;cursor:pointer}.upload-box:active{border-color:#A0522D;background:#fff8f3}.upload-box .icon{font-size:40px;color:#ccc;margin-bottom:10px}.upload-box .text{font-size:14px;color:#888}.upload-box .sub{font-size:12px;color:#bbb;margin-top:6px}.upload-status{background:#fff;border-radius:12px;margin:12px 16px;padding:14px 16px;display:none}.upload-status.show{display:block}.badge{padding:2px 8px;border-radius:8px;font-size:10px;font-weight:500}.badge-pending{background:#fff3e0;color:#e65100}.badge-approved{background:#e8f5e9;color:#2e7d32}.badge-rejected{background:#ffebee;color:#c62828}.dl-item{background:#fff;border-radius:10px;padding:12px 14px;margin-bottom:8px;display:flex;align-items:center;gap:12px;cursor:pointer;box-shadow:0 1px 3px rgba(0,0,0,.04)}.dl-name{font-size:14px;font-weight:500}.dl-count{font-size:11px;color:#999}.bottom-nav{position:fixed;bottom:0;left:0;right:0;width:100%;max-width:100%;background:#fff;display:flex;border-top:2px solid #ddd;z-index:9999;min-height:62px;height:62px;box-shadow:0 -2px 8px rgba(0,0,0,.1);transform:none!important}.nav-item{flex:1;text-align:center;padding:9px 0 7px;cursor:pointer;color:#666;font-size:13px;display:block}.nav-item.active{color:#8B3A3A;font-weight:600}.nav-item .icon{font-size:20px;display:block}.nav-item .label{font-size:10px}.upload-input{display:none}.toast{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);background:rgba(0,0,0,.8);color:#fff;padding:14px 24px;border-radius:10px;font-size:14px;z-index:999;opacity:0;transition:.3s;pointer-events:none}.toast.show{opacity:1}.modal-overlay{position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.5);z-index:300;display:none;align-items:center;justify-content:center}.modal-overlay.show{display:flex}.modal{background:#fff;border-radius:16px;padding:24px;width:340px;max-width:90%}.modal h3{font-size:16px;margin-bottom:14px}.modal label{font-size:13px;color:#666;display:block;margin-top:12px}.modal input,.modal select,.modal textarea{width:100%;padding:10px 12px;border:1px solid #ddd;border-radius:8px;font-size:13px;font-family:inherit;outline:0}.star-input{display:flex;gap:4px;font-size:28px;cursor:pointer;justify-content:center}.star-input span{color:#ddd}.star-input span.active{color:#E6A817}.modal-actions{display:flex;gap:10px;margin-top:16px}.modal-actions button{flex:1;padding:10px;border:none;border-radius:8px;font-size:14px;cursor:pointer;font-family:inherit}.btn-cancel{background:#f0ebe6;color:#666}.btn-submit{background:#8B3A3A;color:#fff}.content-box{background:#fff;border-radius:12px;margin:12px 16px;padding:16px;display:none;box-shadow:0 1px 4px rgba(0,0,0,.06)}.content-box.show{display:block}.content-box h4{font-size:15px;margin-bottom:8px}.content-box .text{font-size:13px;line-height:1.8;color:#444}.formula-box{background:#f8f4f0;border-radius:8px;padding:12px;margin:8px 0}.formula-box .fn{font-weight:600;color:#5a3e36;font-size:14px}.formula-box .fd{font-size:12px;color:#666;margin-top:4px;line-height:1.6}.acupoint-box{background:#f0f4f8;border-radius:8px;padding:12px;margin:8px 0}.acupoint-box .ap{font-weight:600;color:#2c5282}.acupoint-box .apd{font-size:12px;color:#666;margin-top:4px}.fav-btn{font-size:22px;cursor:pointer;background:0;border:none;padding:4px;font-family:inherit}.type-group{margin-bottom:10px}.type-group .tg-title{font-size:13px;font-weight:600;color:#5a3e36;margin-bottom:4px;padding:4px 0;border-bottom:1px solid #f0ebe6}.profile-row{display:flex;align-items:center;padding:14px 16px;border-bottom:1px solid #f5f0eb;cursor:pointer}.profile-row:last-child{border:0}.profile-row .ico{font-size:18px;margin-right:10px}.profile-row .lab{flex:1;font-size:14px}.profile-row .val{font-size:12px;color:#999}</style></head><body><div class="toast" id="toast"></div><div class="modal-overlay" id="feedbackModal"><div class="modal"><h3>提交疗效反馈</h3><label>评分</label><div class="star-input" id="starInput"><span data-v="1">★</span><span data-v="2">★</span><span data-v="3">★</span><span data-v="4">★</span><span data-v="5">★</span></div><label>疗效</label><select id="fbEffect"><option value="effective">有效</option><option value="partial">部分有效</option><option value="ineffective">无效</option></select><label>天数</label><input type="number" id="fbDays" value="7" min="1"><label>描述</label><textarea id="fbDesc" placeholder="分享你的使用感受..."></textarea><div class="modal-actions"><button class="btn-cancel" onclick="closeFeedback()">取消</button><button class="btn-submit" onclick="submitFeedback()">提交（+50积分）</button></div></div></div><div class="modal-overlay" id="payModal"><div class="modal" style="text-align:center"><div style="font-size:48px;margin:10px 0">🔒</div><h3>解锁完整治疗方案</h3><p style="font-size:24px;font-weight:700;color:#8B3A3A;margin:10px 0" id="modalPrice">¥9.90</p><p style="font-size:13px;color:#888">一次性付费，永久查看，永不重复收费</p><p style="font-size:12px;color:#bbb;margin:4px 0 16px">内容上传者可获50%分成</p><div style="display:flex;flex-direction:column;gap:8px"><button class="btn-submit" style="width:100%;padding:12px;border-radius:25px;font-size:16px" onclick="doPay()">✅ 确认支付</button><button class="btn-cancel" style="width:100%;padding:8px" onclick="closePay()">取消</button></div></div></div><div class="header"><h1>🌿 中医智伴</h1><p>传承经典 · 共享验方</p></div><div class="page active" id="pageHome"><div class="search-bar"><span class="icon">🔍</span><input placeholder="搜索疾病，如胃痛、糖尿病、湿疹..." id="searchInput" oninput="searchDisease(this.value)"></div><div class="section-title">疾病分类 <span style="font-size:12px;color:#999;font-weight:400">共13科</span></div><div class="category-grid" id="categoryGrid"></div><div class="section-title">热门推荐 <span style="font-size:12px;color:#A0522D;font-weight:400" onclick="showToast('查看更多')">查看更多</span></div><div id="recommendList"></div></div><div class="page" id="pageDisease"><div style="padding:12px 16px 0"><span class="back-btn" onclick="showPage('pageHome')">← 返回首页</span></div><div class="section-title" id="diseaseCatTitle">内科</div><div class="disease-list" id="diseaseList" style="padding:0 16px"></div></div><div class="page" id="pageDiseaseDetail"><div style="padding:12px 16px 0"><span class="back-btn" onclick="showPage('pageDisease')">← 返回疾病列表</span></div><div class="sub-header" id="diseaseDetailHeader"></div><div class="section-title" style="padding-top:4px">推荐治疗方案</div><div id="diseaseTreatments"></div></div><div class="page" id="pageTreatment"><div style="padding:12px 16px 0;display:flex;align-items:center;gap:8px"><span class="back-btn" onclick="showPage('pageDiseaseDetail')">← 返回</span><button class="fav-btn" id="favBtn" onclick="toggleFav()">🤍</button></div><div class="sub-header" id="treatmentHeader"></div><div class="preview-box"><div class="label">📖 免费预览</div><div class="text" id="previewContent"></div></div><div class="paywall" id="paywall"><div class="price" id="payPrice">¥9.90 <span>一次性付费</span></div><div class="desc">付费后查看完整治疗方案，永久查看</div><button class="pay-btn" id="payBtn" onclick="openPay()">🔓 立即查看完整内容</button></div><div class="content-box" id="fullContent"><h4>📋 完整治疗方案</h4><div class="text" id="fullContentText"></div><div id="formulaSection"></div><div id="acupointSection"></div></div><div class="feedback-section" id="feedbackSection"></div></div><div class="page" id="pageSearch"><div style="padding:12px 16px 0"><span class="back-btn" onclick="showPage('pageHome')">← 返回首页</span></div><div class="section-title" id="searchTitle">搜索结果</div><div id="searchResults" style="padding:0 16px"></div></div><div class="page" id="pageUpload"><div style="padding:16px 20px 4px"><div style="font-size:18px;font-weight:600;color:#5a3e36">📤 上传中心</div><p style="font-size:12px;color:#888;margin-top:4px">粘贴中医内容或拖入文件，AI自动整理归类</p></div><div class="upload-box" id="uploadBox" onclick="document.getElementById('fileInput').click()"><div class="icon">📄</div><div class="text">点击上传文件</div><div class="sub">支持PDF、图片、TXT</div><textarea id="pasteArea" style="width:100%;margin-top:12px;padding:10px;border:1px solid #eee;border-radius:8px;font-size:13px;font-family:inherit;min-height:60px;display:none" placeholder="在此粘贴中医内容..."></textarea><div style="text-align:center;margin:8px 0"><button class="pay-btn sm" onclick="submitPaste()" style="background:#8B3A3A;color:#fff;padding:8px 24px">📤 提交文字内容</button></div><input type="file" class="upload-input" id="fileInput" multiple accept=".pdf,.txt,.png,.jpg,.jpeg" onchange="handleFiles(this.files)"></div><div style="text-align:center;margin:0 16px 12px"><button class="pay-btn sm" style="background:#f0ebe6;color:#5a3e36" onclick="togglePaste()">✏ 或手动粘贴文字</button></div><div class="upload-status" id="uploadStatus"></div><div class="section-title" style="font-size:14px">我的上传记录</div><div id="uploadHistory"></div></div><div class="page" id="pageFav"><div style="padding:12px 16px 0"><span class="back-btn" onclick="showPage('pageProfile')">← 返回个人中心</span></div><div class="section-title">❤️ 我的收藏</div><div id="favList" style="padding:0 16px"></div></div><div class="page" id="pageProfile"><div id="profileLogin" style="text-align:center;padding:60px 20px"><div style="font-size:48px;margin-bottom:10px">👤</div><div style="font-size:16px;color:#888;margin-bottom:16px">登录后使用更多功能</div><button class="pay-btn sm" onclick="switchToLogin()">立即登录</button></div>
-<div id="profileContent" style="display:none"><div style="padding:20px;text-align:center;background:linear-gradient(135deg,#8B3A3A,#A0522D);color:#fff;margin-bottom:12px"><div style="font-size:40px">👤</div><div style="font-size:18px;font-weight:600" id="profileName">用户</div><div style="font-size:12px;opacity:.8" id="profileRole">普通用户</div></div><div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;padding:0 16px;margin-bottom:14px"><div style="background:#fff;border-radius:10px;padding:14px;text-align:center;box-shadow:0 1px 3px rgba(0,0,0,.04)"><div style="font-size:20px;font-weight:700;color:#8B3A3A" id="profilePoints">0</div><div style="font-size:11px;color:#999">积分</div></div><div style="background:#fff;border-radius:10px;padding:14px;text-align:center;box-shadow:0 1px 3px rgba(0,0,0,.04)"><div style="font-size:20px;font-weight:700;color:#2e7d32" id="profileBalance">¥0.00</div><div style="font-size:11px;color:#999">可提现</div></div><div style="background:#fff;border-radius:10px;padding:14px;text-align:center;box-shadow:0 1px 3px rgba(0,0,0,.04)"><div style="font-size:20px;font-weight:700;color:#2c5282" id="profileUploads">0</div><div style="font-size:11px;color:#999">已上传</div></div></div><div style="padding:0 16px"><div style="background:#fff;border-radius:10px;box-shadow:0 1px 3px rgba(0,0,0,.04);overflow:hidden"><div class="profile-row" onclick="showPage('pageFav');renderFavs()"><span class="ico">❤️</span><span class="lab">我的收藏</span><span class="val" id="favCount">0</span><span style="color:#ccc;margin-left:6px">›</span></div><div class="profile-row" onclick="showToast('我的已购 - 共6个方案')"><span class="ico">📦</span><span class="lab">我的已购</span><span class="val">6</span><span style="color:#ccc;margin-left:6px">›</span></div><div class="profile-row" onclick="showToast('收益明细 - 累计收益¥173.00')"><span class="ico">💰</span><span class="lab">收益看板</span><span class="val" style="color:#2e7d32">¥173.00</span><span style="color:#ccc;margin-left:6px">›</span></div><div class="profile-row" onclick="showToast('积分中心 - 128积分')"><span class="ico">🏆</span><span class="lab">积分中心</span><span class="val" style="color:#E6A817">128分</span><span style="color:#ccc;margin-left:6px">›</span></div><div class="profile-row" onclick="showToast('我的上传 - 12个')"><span class="ico">📤</span><span class="lab">我的上传</span><span class="val">审核中2</span><span style="color:#ccc;margin-left:6px">›</span></div><div class="profile-row" onclick="showPage('pageAdmin');loadAdmin()"><span class="ico">⚙️</span><span class="lab">设置</span><span style="color:#ccc;margin-left:6px">›</span></div></div></div></div></div>
-</div><!-- close pageProfile -->
-<div class="bottom-nav"><div class="nav-item active" data-page="pageHome" onclick="switchNav(this,'pageHome')"><span class="icon">🏠</span><span class="label">首页</span></div><div class="nav-item" data-page="pageDisease" onclick="switchNav(this,'pageDisease')"><span class="icon">🔍</span><span class="label">疾病</span></div><div class="nav-item" data-page="pageUpload" onclick="switchNav(this,'pageUpload')"><span class="icon">📤</span><span class="label">上传</span></div><div class="nav-item" data-page="pageProfile" onclick="switchNav(this,'pageProfile')"><span class="icon">👤</span><span class="label">我的</span></div></div>
-<!-- Auth Page -->
+<!DOCTYPE html><html lang="zh-CN"><head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no">
+<title>中医智伴 - 中医治疗方案查询与分享平台</title>
+<link rel="stylesheet" href="/static/css/style.css">
+<style>
+.badge-gold{background:linear-gradient(135deg,#D4A04A,#B8860B);color:#fff;padding:2px 10px;border-radius:20px;font-size:10px;display:inline-block}
+.member-card{background:var(--color-bg-card);border-radius:var(--radius-md);margin:0 var(--space-md) var(--space-sm);padding:var(--space-md);box-shadow:var(--shadow-sm)}
+.member-card h4{font-size:14px;font-weight:600;margin-bottom:8px;color:var(--color-text)}
+.member-card p{font-size:13px;color:var(--color-text-secondary);line-height:1.6}
+.member-card .fee{font-size:28px;font-weight:700;color:var(--color-primary);margin:8px 0}
+</style>
+</head><body>
+
+<div class="toast" id="toast"></div>
+
+<!-- Header -->
+<div class="app-header">
+  <div class="brand">
+    <span class="brand-icon">🌿</span>
+    <div class="brand-text"><h1>中医智伴</h1><p>传承经典 · 共享验方</p></div>
+  </div>
+</div>
+
+<!-- ===== HOME ===== -->
+<div class="page active" id="pageHome">
+  <div class="search-bar">
+    <span class="search-icon">🔍</span>
+    <input type="text" id="searchInput" placeholder="搜索疾病，如胃痛、糖尿病、湿疹..." onkeydown="if(event.key==='Enter') doSearch()">
+  </div>
+  <div class="section-header">
+    <h2>疾病分类</h2>
+    <span class="section-sub" style="display:none" id="catCount"></span>
+  </div>
+  <div class="category-grid" id="categoryGrid"></div>
+  <div class="section-header">
+    <h2>热门推荐</h2>
+    <span class="section-more">查看更多</span>
+  </div>
+  <div id="recommendList"></div>
+</div>
+
+<!-- ===== DISEASE LIST ===== -->
+<div class="page" id="pageDisease">
+  <div class="app-header">
+    <button class="header-back" onclick="showPage('pageHome');loadHome()">← 返回首页</button>
+    <span class="brand-text" style="color:white"><h1 style="font-size:16px" id="diseaseCatTitle">分类</h1></span>
+    <span></span>
+  </div>
+  <div id="diseaseList"></div>
+</div>
+
+<!-- ===== DISEASE DETAIL ===== -->
+<div class="page" id="pageDiseaseDetail">
+  <div class="app-header">
+    <button class="header-back" onclick="showCategory(currentCategoryId)">← 返回疾病列表</button>
+    <span></span><span></span>
+  </div>
+  <div class="sub-header" id="diseaseDetailHeader"></div>
+  <div class="section-header"><h2>推荐治疗方案</h2></div>
+  <div id="diseaseTreatments"></div>
+</div>
+
+<!-- ===== TREATMENT DETAIL ===== -->
+<div class="page" id="pageTreatment">
+  <div class="app-header">
+    <button class="header-back" onclick="showDiseaseDetail(currentDiseaseId)">← 返回疾病列表</button>
+    <span></span><span></span>
+  </div>
+  <div class="detail-header" id="treatmentHeader"></div>
+  <div class="preview-box" id="previewBox">
+    <div class="preview-label">预览</div>
+    <div class="preview-text" id="previewContent"></div>
+  </div>
+  <div class="paywall" id="paywall">
+    <div class="pay-price" id="payPrice"></div>
+    <div class="pay-desc">一次性购买，永久查看完整内容</div>
+    <button class="btn-primary" onclick="buyTreatment()">解锁完整内容</button>
+  </div>
+  <div class="full-content" id="fullContent">
+    <div class="content-section" id="fullContentText" style="white-space:pre-wrap"></div>
+    <div class="content-section" id="formulaSection"></div>
+    <div class="content-section" id="acupointSection"></div>
+  </div>
+  <div class="feedback-section" id="feedbackSection">
+    <div class="section-header"><h2>疗效反馈</h2></div>
+    <div id="feedbackList"></div>
+  </div>
+</div>
+
+<!-- ===== UPLOAD ===== -->
+<div class="page" id="pageUpload">
+  <div class="section-header"><h2>上传中心</h2></div>
+  <div class="upload-area" onclick="togglePaste()">
+    <div class="upload-icon">📤</div>
+    <div class="upload-text">粘贴中医内容，或拖入文件/图片</div>
+    <div class="upload-sub">支持文字、PDF、图片（AI自动处理）</div>
+  </div>
+  <div class="paste-area" id="pasteArea">
+    <textarea placeholder="请粘贴中医治疗方案内容，如方剂组成、针灸穴位、操作方法等。AI会自动提取和归类。"></textarea>
+    <div class="paste-actions">
+      <button class="btn-primary btn-sm" onclick="submitPaste()">提交</button>
+      <button class="btn-ghost" onclick="document.getElementById('pasteArea').classList.remove('show')">取消</button>
+    </div>
+    <div style="font-size:12px;color:#999;margin-top:8px">提示：AI会自动提取标题、疾病、治疗类型等内容。</div>
+  </div>
+  <div class="section-header"><h2>上传记录</h2></div>
+  <div id="uploadHistory"></div>
+</div>
+
+<!-- ===== AUTH ===== -->
 <div class="page" id="pageAuth">
-<div style="padding:20px 20px 12px"><span class="back-btn" onclick="showPage('pageProfile')">← 返回</span></div>
-<div style="padding:0 20px;max-width:360px;margin:0 auto">
-<h2 id="authTitle" style="font-size:22px;font-weight:600;color:#5a3e36;margin-bottom:20px;text-align:center">登录</h2>
-<input type="hidden" id="authIsRegister" value="false">
-<label style="font-size:13px;color:#666;display:block;margin-bottom:4px">手机号</label>
-<input type="text" id="authPhone" placeholder="请输入手机号" style="width:100%;padding:10px 12px;border:1px solid #ddd;border-radius:8px;font-size:14px;margin-bottom:14px;outline:0">
-<label style="font-size:13px;color:#666;display:block;margin-bottom:4px">密码</label>
-<input type="password" id="authPassword" placeholder="请输入密码" style="width:100%;padding:10px 12px;border:1px solid #ddd;border-radius:8px;font-size:14px;margin-bottom:14px;outline:0">
-<div id="authUsernameRow" style="display:none">
-<label style="font-size:13px;color:#666;display:block;margin-bottom:4px">昵称</label>
-<input type="text" id="authUsername" placeholder="请输入昵称" style="width:100%;padding:10px 12px;border:1px solid #ddd;border-radius:8px;font-size:14px;margin-bottom:14px;outline:0">
-</div>
-<button class="pay-btn" style="width:100%;margin-bottom:12px" id="authSubmitBtn" onclick="submitAuth()">登录</button>
-<div style="text-align:center;font-size:13px;color:#888" id="authToggle"></div>
-</div>
+  <div class="app-header">
+    <button class="header-back" onclick="showPage('pageProfile');renderProfile()">← 返回</button>
+    <span></span><span></span>
+  </div>
+<div class="auth-form">
+   <h2 id="authTitle">登录</h2>
+   <input type="hidden" id="authIsRegister" value="false">
+    <div class="form-group">
+      <label>手机号</label>
+      <input type="text" id="authPhone" placeholder="请输入手机号">
+    </div>
+    <div class="form-group">
+      <label>密码</label>
+      <input type="password" id="authPassword" placeholder="请输入密码">
+    </div>
+    <div class="form-group" id="authUsernameRow" style="display:none">
+      <label>昵称</label>
+      <input type="text" id="authUsername" placeholder="请输入昵称">
+    </div>
+    <button class="btn-primary form-submit" id="authSubmitBtn" onclick="submitAuth()">登录</button>
+    <div class="form-toggle" id="authToggle"></div>
+  </div>
 </div>
 
-<!-- Admin Page -->
+<!-- ===== PROFILE ===== -->
+<!-- ===== MEMBER CENTER ===== -->
+<div class="page" id="pageMember">
+  <div class="app-header">
+    <button class="header-back" onclick="showPage('pageProfile')">← 返回</button>
+    <span class="brand-text" style="color:white"><h1 style="font-size:16px">会员中心</h1></span>
+    <span></span>
+  </div>
+  <div class="profile-card">
+    <div class="profile-name">会员状态</div>
+    <div class="profile-role" id="memberStatus">未开通</div>
+  </div>
+  <div class="profile-stats">
+    <div class="profile-stat"><div class="stat-value red"><span id="memberType">-</span></div><div class="stat-label">会员类型</div></div>
+    <div class="profile-stat"><div class="stat-value green"><span id="memberEnd">-</span></div><div class="stat-label">到期时间</div></div>
+    <div class="profile-stat"><div class="stat-value blue"><span id="memberUploads">0</span></div><div class="stat-label">通过审核</div></div>
+  </div>
+  <div class="profile-menu">
+    <div class="menu-group">
+      <div class="menu-item" style="justify-content:center;padding:16px">
+        <div style="text-align:center">
+          <div style="font-size:24px;font-weight:700;color:var(--color-primary)" id="memberAnnualFee">199/年</div>
+          <div style="font-size:12px;color:#999;margin-top:4px">一年一付，畅享全部内容</div>
+          <button class="btn-primary btn-sm mt-sm" id="memberUpgradeBtn" onclick="upgradeMember()">立即开通会员</button>
+          <button class="btn-secondary btn-sm mt-sm" id="contributorApplyBtn" style="display:none" onclick="applyContributor()">申请贡献者会员</button>
+        </div>
+      </div>
+      <div class="menu-item">
+        <div style="font-size:13px;color:#666;line-height:1.6">
+          <p><strong>正式会员</strong> - 每年付费，可查看所有方案</p>
+          <p><strong>贡献者会员</strong> - 上传通过10个方子后可申请，首年免费</p>
+          <p style="margin-top:4px">贡献者每年需提交续期申请，平台根据贡献审核</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== ADMIN MEMBER ===== -->
+<div class="page" id="pageAdminMember">
+  <div class="app-header">
+    <button class="header-back" onclick="showPage('pageAdmin')">← 返回</button>
+    <span class="brand-text" style="color:white"><h1 style="font-size:16px">会员管理</h1></span>
+    <span></span>
+  </div>
+  <div class="section-header"><h2>会员设置</h2></div>
+  <div class="profile-menu" id="adminMemberSettings">
+    <div class="menu-group">
+      <div class="menu-item" style="flex-direction:column;align-items:stretch">
+        <div class="form-group">
+          <label>年费（元）</label>
+          <input type="number" id="memberFee" value="199">
+        </div>
+        <div class="form-group">
+          <label>会员时长（天）</label>
+          <input type="number" id="memberDays" value="365">
+        </div>
+        <button class="btn-primary btn-sm" onclick="saveMemberSettings()">保存设置</button>
+      </div>
+    </div>
+  </div>
+  <div class="section-header"><h2>会员列表</h2></div>
+  <div id="adminMemberList"></div>
+  <div class="section-header"><h2>待审核申请</h2></div>
+  <div id="adminApplications"></div>
+</div>
+
+<!-- ===== PROFILE (updated) ===== -->
+<div class="page" id="pageProfile">
+  <div id="profileLogin" class="login-prompt">
+    <div class="empty-icon" style="font-size:48px;margin-bottom:16px;opacity:0.5">👤</div>
+    <div class="empty-text" style="margin-bottom:16px;color:#666;font-size:15px">登录后使用更多功能</div>
+    <button class="btn-primary" onclick="switchToLogin()">立即登录</button>
+  </div>
+  <div id="profileContent" style="display:none">
+    <div class="profile-card">
+      <div class="profile-name" id="profileName">用户</div>
+      <div class="profile-role" id="profileRole">普通用户</div>
+    </div>
+    <div class="profile-stats">
+      <div class="profile-stat"><div class="stat-value red" id="profilePoints">0</div><div class="stat-label">积分</div></div>
+      <div class="profile-stat"><div class="stat-value green" style="color:#2e7d32" id="profileBalance">¥0.00</div><div class="stat-label">可提现</div></div>
+      <div class="profile-stat"><div class="stat-value blue" style="color:#2196F3" id="profileUploads">0</div><div class="stat-label">已上传</div></div>
+    </div>
+    <div class="profile-menu">
+      <div class="menu-group">
+        <div class="menu-item" onclick="loadFavs();showPage('pageFav')">
+          <span class="menu-icon">❤️</span><span class="menu-label">我的收藏</span><span class="menu-arrow">></span>
+        </div>
+        <div class="menu-item" onclick="showPage('pageMember');loadMemberStatus()">
+          <span class="menu-icon">⭐</span><span class="menu-label">会员中心</span><span class="menu-value" id="profileMemberInfo">-</span><span class="menu-arrow">></span>
+        </div>
+        <div class="menu-item" onclick="showToast('功能开发中')">
+          <span class="menu-icon">📦</span><span class="menu-label">我的已购</span><span class="menu-arrow">></span>
+        </div>
+        <div class="menu-item" onclick="showToast('功能开发中')">
+          <span class="menu-icon">🏆</span><span class="menu-label">积分中心</span><span class="menu-arrow">></span>
+        </div>
+        <div class="menu-item" onclick="showToast('功能开发中')">
+          <span class="menu-icon">📤</span><span class="menu-label">我的上传</span><span class="menu-arrow">></span>
+        </div>
+          <span class="menu-icon">⭐</span><span class="menu-label">会员管理</span><span class="menu-arrow">></span>
+        </div>
+        <div class="menu-item" onclick="logout()">
+          <span class="menu-icon">🚪</span><span class="menu-label">退出登录</span><span class="menu-arrow">></span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== FAVORITES ===== -->
+<div class="page" id="pageFav">
+  <div class="app-header">
+    <button class="header-back" onclick="showPage('pageProfile');renderProfile()">← 返回</button>
+    <span class="brand-text" style="color:white"><h1 style="font-size:16px">我的收藏</h1></span>
+    <span></span>
+  </div>
+  <div class="section-header"><h2>收藏列表</h2></div>
+  <div id="favList"></div>
+</div>
+
+<!-- ===== ADMIN ===== -->
 <div class="page" id="pageAdmin">
-<div style="padding:12px 16px 0;display:flex;align-items:center;justify-content:space-between">
-<span class="back-btn" onclick="showPage('pageProfile')">← 返回</span>
-<span style="font-size:16px;font-weight:600;color:#5a3e36">管理后台</span>
-<span></span>
+  <div class="app-header">
+    <button class="header-back" onclick="showPage('pageProfile');renderProfile()">← 返回</button>
+    <span class="brand-text" style="color:white"><h1 style="font-size:16px">管理后台</h1></span>
+    <span></span>
+  </div>
+  <div class="section-header"><h2>待审核列表</h2></div>
+  <div id="adminPendingList"></div>
 </div>
-<div class="section-title">待审核列表</div>
-<div id="adminPendingList" style="padding:0 16px"></div>
-</div>
+
+<!-- ===== BOTTOM NAV ===== -->
+<nav class="bottom-nav">
+  <button class="nav-item active" data-page="pageHome" onclick="switchNav(this,'pageHome')">
+    <span class="nav-icon">🏠</span><span>首页</span>
+  </button>
+  <button class="nav-item" data-page="pageDisease" onclick="switchNav(this,'pageDisease');loadHome()">
+    <span class="nav-icon">🔍</span><span>疾病</span>
+  </button>
+  <button class="nav-item" data-page="pageUpload" onclick="switchNav(this,'pageUpload');loadUploads()">
+    <span class="nav-icon">📤</span><span>上传</span>
+  </button>
+  <button class="nav-item" data-page="pageProfile" onclick="switchNav(this,'pageProfile')">
+    <span class="nav-icon">👤</span><span>我的</span>
+  </button>
+</nav>
+
+<script src="/static/js/app.js"></script>
 <script>
-var API = "";
-var token = localStorage.getItem("token") || "";
-var user = JSON.parse(localStorage.getItem("user") || "null");
-var currentTreatmentId = null;
-var fbRating = 5;
-var fbEfficacy = "effective";
-document.addEventListener("DOMContentLoaded", function() { renderProfile(); loadHome(); });
-// 中医智慧平台 - Frontend API Layer
-
-function showToast(m) {
-    var t = document.getElementById('toast');
-    t.textContent = m;
-    t.classList.add('show');
-    clearTimeout(t._timer);
-    t._timer = setTimeout(function() { t.classList.remove('show'); }, 2000);
+/* MEMBER FUNCTIONS */
+async function loadMemberStatus(){
+  if(!token||!user){return;}
+  try{
+    var s=await api('/api/member/status');
+    var el=document.getElementById('memberStatus');
+    if(el)el.textContent=s.is_member?'已开通':'未开通';
+    var el2=document.getElementById('memberType');
+    if(el2)el2.textContent=s.member_type||'-';
+    var el3=document.getElementById('memberEnd');
+    if(el3)el3.textContent=s.member_end?s.member_end.substring(0,10):'-';
+    var el4=document.getElementById('memberUploads');
+    if(el4)el4.textContent=s.approved_uploads||0;
+    var el5=document.getElementById('memberAnnualFee');
+    if(el5)el5.textContent='?'+s.annual_fee+'/年';
+    var upBtn=document.getElementById('memberUpgradeBtn');
+    var conBtn=document.getElementById('contributorApplyBtn');
+    if(upBtn)upBtn.style.display=s.is_member?'none':'inline-flex';
+    if(conBtn)conBtn.style.display=(s.approved_uploads>=10&&!s.is_member)?'inline-flex':'none';
+    var pmi=document.getElementById('profileMemberInfo');
+    if(pmi)pmi.textContent=s.is_member?'已开通':'未开通';
+  }catch(e){}
 }
-
-function esc(v) {
-    return String(v == null ? '' : v).replace(/[&<>"']/g, function(ch) {
-        return {'&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;'}[ch];
-    });
+async function upgradeMember(){
+  try{
+    var r=await api('/api/member/apply',{method:'POST',body:{action:'upgrade'}});
+    showToast(r.message);loadMemberStatus();
+  }catch(e){showToast(e.message);}
 }
-
-function showPage(id) {
-    document.querySelectorAll('.page').forEach(function(p) { p.classList.remove('active'); });
-    var el = document.getElementById(id);
-    if (el) el.classList.add('active');
-    document.querySelectorAll('.nav-item').forEach(function(n) {
-        n.classList.toggle('active', n.dataset.page === id);
-    });
+async function applyContributor(){
+  try{
+    var r=await api('/api/member/apply',{method:'POST',body:{action:'renewal'}});
+    showToast(r.message);
+  }catch(e){showToast(e.message);}
 }
-
-function switchNav(el, p) { showPage(p); }
-
-function updateUser() {
-    user = JSON.parse(localStorage.getItem('user') || 'null');
-    token = localStorage.getItem('token') || '';
+async function saveMemberSettings(){
+  try{
+    var r=await api('/api/admin/member/settings',{method:'POST',body:{
+      annual_fee:parseFloat(document.getElementById('memberFee').value),
+      free_duration_days:parseInt(document.getElementById('memberDays').value)
+    }});
+    showToast(r.message);
+  }catch(e){showToast(e.message);}
 }
-
-async function api(path, opts) {
-    var headers = {'Content-Type': 'application/json'};
-    if (token) headers['Authorization'] = 'Bearer ' + token;
-    var conf = {headers: headers};
-    if (opts) {
-        if (opts.method) conf.method = opts.method;
-        if (opts.body) conf.body = JSON.stringify(opts.body);
+async function loadAdminMembers(){
+  try{
+    var s=await api('/api/admin/member/settings');
+    var feeEl=document.getElementById('memberFee');
+    var daysEl=document.getElementById('memberDays');
+    if(feeEl)feeEl.value=s.annual_fee;
+    if(daysEl)daysEl.value=s.free_duration_days;
+    var members=await api('/api/admin/member/list');
+    var mel=document.getElementById('adminMemberList');
+    if(mel){
+      if(!members.length){showEmpty(mel,'???','暂无会员记录');return;}
+      var h=[];
+      for(var i=0;i<members.length;i++){
+        var m=members[i];
+        h.push('<div class="member-card"><h4>'+esc(m.username)+'</h4><p>手机: '+esc(m.phone)+' | 类型: '+esc(m.type)+' | 状态: '+esc(m.status)+'</p><p style="font-size:12px;color:#999">到期: '+(m.end_date?m.end_date.substring(0,10):'-')+'</p></div>');
+      }
+      mel.innerHTML=h.join('');
     }
-    var resp = await fetch(API + path, conf);
-    var data = await resp.json();
-    if (!resp.ok && data.error) throw new Error(data.error);
-    return data;
-}
-
-// === HOME ===
-async function loadHome() {
-    try {
-        var cats = await api('/api/categories');
-        var g = document.getElementById('categoryGrid');
-        if (!g) return;
-        var h = [];
-        for (var i = 0; i < cats.length; i++) {
-            var c = cats[i];
-            h.push('<div class="cat-item" onclick="showCategory(' + c.id + ')">' +
-                '<div class="cat-icon" style="background:' + c.color + '">' + c.icon + '</div>' +
-                '<div class="cat-name">' + c.name + '</div></div>');
-        }
-        g.innerHTML = h.join('');
-        loadRecs();
-    } catch(e) { showToast('加载失败'); }
-}
-
-async function loadRecs() {
-    try {
-        var treats = await api('/api/treatments');
-        var el = document.getElementById('recommendList');
-        if (!el) return;
-        var ids = [10101, 10201, 50101, 60101, 30202, 30101];
-        var data = [];
-        for (var i = 0; i < ids.length; i++)
-            for (var j = 0; j < treats.length; j++)
-                if (treats[j].id === ids[i]) { data.push(treats[j]); break; }
-        var h = [];
-        for (var i = 0; i < data.length; i++) {
-            var t = data[i];
-            var tags = '';
-            for (var j = 0; j < t.types.length; j++) tags += '<span class="tag">' + t.types[j] + '</span>';
-            var sp = t.is_special ? '<span class="tag tag-spec">特殊疗效</span>' : '';
-            h.push('<div class="treatment-card" onclick="showTreatment(' + t.id + ')">' +
-                '<div class="tc-header"><div class="tc-title">' + t.title + '</div><div class="tc-price">¥' + t.price + '</div></div>' +
-                '<div class="tc-tags">' + tags + sp + '</div>' +
-                '<div class="tc-meta"><span>⭐' + t.rating + '</span><span>💬' + t.feedback_count + '条反馈</span><span>✅' + t.effective_rate + '%有效</span></div></div>');
-        }
-        el.innerHTML = h.join('');
-    } catch(e) {}
-}
-
-// === CATEGORY ===
-async function showCategory(cid) {
-    try {
-        var cats = await api('/api/categories');
-        var cat = null;
-        for (var i = 0; i < cats.length; i++) { if (cats[i].id === cid) { cat = cats[i]; break; } }
-        document.getElementById('diseaseCatTitle').textContent = cat ? cat.name : '分类';
-        var ds = await api('/api/diseases?category_id=' + cid);
-        var h = [];
-        for (var i = 0; i < ds.length; i++) {
-            var d = ds[i];
-            h.push('<div class="dl-item" onclick="showDiseaseDetail(' + d.id + ')">' +
-                '<div class="dl-icon" style="font-size:24px">' + d.icon + '</div>' +
-                '<div class="dl-info"><div class="dl-name">' + d.name + '</div>' +
-                '<div class="dl-count">' + d.treatment_count + '个治疗方案</div></div>' +
-                '<span class="dl-arrow">›</span></div>');
-        }
-        document.getElementById('diseaseList').innerHTML = h.join('');
-        showPage('pageDisease');
-    } catch(e) { showToast('加载失败'); }
-}
-
-// === DISEASE DETAIL ===
-async function showDiseaseDetail(did) {
-    try {
-        var treats = await api('/api/treatments?disease_id=' + did);
-        var tf = 0, tr = 0;
-        for (var i = 0; i < treats.length; i++) { tf += treats[i].feedback_count; tr += treats[i].rating; }
-        var avg = treats.length ? (tr / treats.length).toFixed(1) : 0;
-        var hdr = '<div class="name"> ' + (treats.length > 0 ? treats[0].title.replace(/^(\S+).*$/, '$1') : '疾病详情') +
-            '</div><div class="sub">' + treats.length + '个治疗方案</div>' +
-            '<div class="stats"><div class="stat"><div class="stat-num">' + treats.length + '</div><div class="stat-label">方案</div></div>' +
-            '<div class="stat"><div class="stat-num">' + tf + '</div><div class="stat-label">反馈</div></div>' +
-            '<div class="stat"><div class="stat-num">' + avg + '</div><div class="stat-label">评分</div></div></div>';
-        document.getElementById('diseaseDetailHeader').innerHTML = hdr;
-        var h = [];
-        for (var i = 0; i < treats.length; i++) {
-            var t = treats[i];
-            var sp = t.is_special ? '<span class="tag tag-spec">特殊疗效</span>' : '';
-            var tags = '';
-            for (var j = 0; j < t.types.length; j++) tags += '<span class="tag">' + t.types[j] + '</span>';
-            h.push('<div class="treatment-card" onclick="showTreatment(' + t.id + ')">' +
-                '<div class="tc-header"><div class="tc-title">' + t.title + '</div><div class="tc-price">¥' + t.price + '</div></div>' +
-                '<div class="tc-tags">' + tags + sp + '</div>' +
-                '<div class="tc-meta"><span>⭐' + t.rating + '</span><span>💬' + t.feedback_count + '条反馈</span><span>✅' + t.effective_rate + '%有效</span></div></div>');
-        }
-        document.getElementById('diseaseTreatments').innerHTML = h.join('');
-        showPage('pageDiseaseDetail');
-    } catch(e) { showToast('加载失败'); }
-}
-
-// === TREATMENT ===
-async function showTreatment(tid) {
-    updateUser();
-    if (!token) { showToast('请先登录'); showPage('pageProfile'); return; }
-    try {
-        currentTreatmentId = tid;
-        var t = await api('/api/treatments/' + tid);
-        document.getElementById('favBtn').textContent = t.is_favorited ? '❤️' : '🤍';
-        var tags = '<div class="tc-tags" style="margin-top:6px">';
-        for (var i = 0; i < t.types.length; i++) tags += '<span class="tag">' + t.types[i] + '</span>';
-        if (t.is_special) tags += '<span class="tag tag-spec">特殊疗效</span>';
-        tags += '</div>';
-        document.getElementById('treatmentHeader').innerHTML =
-            '<div class="name">' + t.title + '</div>' + tags +
-            '<div class="stats"><div class="stat"><div class="stat-num">⭐' + t.rating + '</div><div class="stat-label">评分</div></div>' +
-            '<div class="stat"><div class="stat-num">' + t.feedback_count + '</div><div class="stat-label">反馈</div></div>' +
-            '<div class="stat"><div class="stat-num">' + t.effective_rate + '%</div><div class="stat-label">有效</div></div></div>';
-        document.getElementById('previewContent').textContent = t.preview || '';
-        if (t.is_purchased) {
-            document.getElementById('paywall').style.display = 'none';
-            document.getElementById('fullContent').classList.add('show');
-            renderFull(t);
-        } else {
-            document.getElementById('paywall').style.display = 'block';
-            document.getElementById('fullContent').classList.remove('show');
-            document.getElementById('payPrice').innerHTML = '¥' + t.price + ' <span>一次性付费，永久查看</span>';
-        }
-        loadFeedback(tid);
-        showPage('pageTreatment');
-    } catch(e) { showToast('加载失败: ' + e.message); }
-}
-
-function renderFull(t) {
-    var el = document.getElementById('fullContentText');
-    el.textContent = t.full_content || '暂无完整内容';
-    var fs = document.getElementById('formulaSection');
-    var as = document.getElementById('acupointSection');
-    var h = [];
-    if (t.formulas && t.formulas.length) {
-        h.push('<h4 style="margin-top:14px;font-size:14px;color:#5a3e36">🌿 方剂明细</h4>');
-        for (var i = 0; i < t.formulas.length; i++) {
-            var f = t.formulas[i];
-            h.push('<div class="formula-box"><div class="fn">' + (f.formula_name || '') +
-                '</div><div class="fd"><strong>组成：</strong>' + (f.ingredients || '') +
-                '</div><div class="fd"><strong>用法：</strong>' + (f.usage_text || '') +
-                '</div>' + (f.note ? '<div class="fd"><strong>备注：</strong>' + f.note + '</div>' : '') + '</div>');
-        }
+    var apps=await api('/api/admin/member/applications');
+    var ael=document.getElementById('adminApplications');
+    if(ael){
+      if(!apps.length){showEmpty(ael,'???','暂无待审核申请');return;}
+      var h2=[];
+      for(var i=0;i<apps.length;i++){
+        var a=apps[i];
+        h2.push('<div class="member-card"><h4>'+esc(a.username)+'</h4><p>类型: '+esc(a.type)+' | 状态: '+esc(a.status)+'</p>'+(a.status==='pending'?'<div class="admin-actions"><button class="btn-approve" onclick="approveApp('+a.id+')">通过</button><button class="btn-reject" onclick="rejectApp('+a.id+')">驳回</button></div>':'')+'</div>');
+      }
+      ael.innerHTML=h2.join('');
     }
-    fs.innerHTML = h.join('');
-    h = [];
-    if (t.acupoints && t.acupoints.length) {
-        h.push('<h4 style="margin-top:14px;font-size:14px;color:#5a3e36">📍 针灸方案</h4>');
-        for (var i = 0; i < t.acupoints.length; i++) {
-            var a = t.acupoints[i];
-            h.push('<div class="acupoint-box"><div class="ap">取穴：' + (a.points || '') +
-                '</div><div class="apd"><strong>手法：</strong>' + (a.method || '') +
-                '</div><div class="apd"><strong>疗程：</strong>' + (a.course || '') + '</div></div>');
-        }
+  }catch(e){}
+}
+async function approveApp(id){
+  try{
+    await api('/api/admin/member/applications',{method:'POST',body:{application_id:id,action:'approve'}});
+    showToast('已通过');loadAdminMembers();
+  }catch(e){showToast(e.message);}
+}
+async function rejectApp(id){
+  var r=prompt('请输入驳回理由：');
+  if(!r)return;
+  try{
+    await api('/api/admin/member/applications',{method:'POST',body:{application_id:id,action:'reject',review_note:r}});
+    showToast('已驳回');loadAdminMembers();
+  }catch(e){showToast(e.message);}
+}
+
+/* OVERRIDE: buyTreatment -> show membership */
+async function buyTreatment(){showToast('请先开通会员');showPage('pageMember');loadMemberStatus();}
+
+/* OVERRIDE: showTreatment to show member info */
+var origShowTreatment=window.showTreatment;
+window.showTreatment=async function(tid){
+  updateUser();
+  if(!token){showToast('请先登录');showPage('pageProfile');return;}
+  currentTreatmentId=tid;
+  try{
+    var t=await api('/api/treatments/'+tid);
+    var tags='<div class="detail-tags">';
+    for(var i=0;i<t.types.length;i++)tags+='<span class="card-tag">'+esc(t.types[i])+'</span>';
+    if(t.is_special)tags+='<span class="card-tag special">推荐</span>';
+    tags+='</div>';
+    document.getElementById('treatmentHeader').innerHTML='<div class="detail-title">'+esc(t.title)+'</div>'+tags+'<div class="detail-stats"><div class="detail-stat"><div class="num">'+stars(t.rating)+' '+t.rating+'</div><div class="label">评分</div></div><div class="detail-stat"><div class="num">'+t.feedback_count+'</div><div class="label">反馈</div></div><div class="detail-stat"><div class="num">'+t.effective_rate+'%</div><div class="label">有效</div></div></div>';
+    document.getElementById('previewContent').textContent=t.preview||'';
+    if(t.can_view){
+      document.getElementById('paywall').style.display='none';
+      document.getElementById('fullContent').classList.add('show');
+      renderFullContent(t);
+    }else{
+      document.getElementById('paywall').style.display='block';
+      document.getElementById('fullContent').classList.remove('show');
+      document.getElementById('payPrice').innerHTML='<span>非会员每日仅可查看1个方案</span>';
+      document.getElementById('payDesc').textContent='开通会员可查看全部';
+      document.getElementById('payBtn').textContent='开通会员 随时查看';
+      document.getElementById('payBtn').onclick=function(){showPage('pageMember');loadMemberStatus();};
     }
-    as.innerHTML = h.join('');
-}
+    renderFeedback(tid);
+    showPage('pageTreatment');
+  }catch(e){showToast('加载失败: '+e.message);}
+};
 
-// === SEARCH ===
-var searchTimer = null;
-function searchDisease(val) {
-    clearTimeout(searchTimer);
-    if (!val.trim()) { loadRecs(); return; }
-    searchTimer = setTimeout(function() { doSearch(val.trim()); }, 300);
-}
-
-async function doSearch(q) {
-    try {
-        var treats = await api('/api/treatments?search=' + encodeURIComponent(q));
-        var el = document.getElementById('searchResults');
-        document.getElementById('searchTitle').textContent = '"' + q + '" 搜索结果 · ' + treats.length + '条';
-        if (!treats.length) {
-            el.innerHTML = '<div style="text-align:center;padding:40px 20px;color:#bbb;font-size:14px">未找到相关结果<br><span style="font-size:12px">试试其他关键词</span></div>';
-            showPage('pageSearch'); return;
-        }
-        var typeOrder = ['针灸', '拔罐', '放血', '推拿手法', '方剂内服', '方剂外用', '食疗药膳', '导引气功'];
-        var grouped = {};
-        for (var i = 0; i < treats.length; i++) {
-            for (var j = 0; j < treats[i].types.length; j++) {
-                var tp = treats[i].types[j];
-                if (!grouped[tp]) grouped[tp] = [];
-                var dup = false;
-                for (var gi = 0; gi < grouped[tp].length; gi++) { if (grouped[tp][gi].id === treats[i].id) { dup = true; break; } }
-                if (!dup) grouped[tp].push(treats[i]);
-            }
-        }
-        var h = [];
-        for (var oi = 0; oi < typeOrder.length; oi++) {
-            var tp = typeOrder[oi];
-            if (grouped[tp] && grouped[tp].length) {
-                h.push('<div class="type-group"><div class="tg-title">🏷 ' + tp + ' (' + grouped[tp].length + ')</div>');
-                for (var gi = 0; gi < grouped[tp].length; gi++) {
-                    var t = grouped[tp][gi];
-                    var tags = '';
-                    for (var j = 0; j < t.types.length; j++) tags += '<span class="tag">' + t.types[j] + '</span>';
-                    h.push('<div class="treatment-card" onclick="showTreatment(' + t.id + ')"><div class="tc-header"><div class="tc-title">' + t.title + '</div><div class="tc-price">¥' + t.price + '</div></div><div class="tc-tags">' + tags + '</div><div class="tc-meta"><span>⭐' + t.rating + '</span></div></div>');
-                }
-                h.push('</div>');
-            }
-        }
-        el.innerHTML = h.join('');
-        showPage('pageSearch');
-    } catch(e) { showToast('搜索失败'); }
-}
-
-// === FEEDBACK ===
-function openFeedback() {
-    fbRating = 0;
-    var ss = document.querySelectorAll('#starInput span');
-    for (var i = 0; i < ss.length; i++) ss[i].classList.remove('active');
-    document.getElementById('fbEffect').value = 'effective';
-    document.getElementById('fbDays').value = 7;
-    document.getElementById('fbDesc').value = '';
-    document.getElementById('feedbackModal').classList.add('show');
-}
-
-function closeFeedback() {
-    document.getElementById('feedbackModal').classList.remove('show');
-}
-
-document.getElementById('starInput').addEventListener('click', function(e) {
-    if (e.target.tagName === 'SPAN' && e.target.dataset.v) {
-        fbRating = parseInt(e.target.dataset.v);
-        var ss = document.querySelectorAll('#starInput span');
-        for (var i = 0; i < ss.length; i++) ss[i].classList.toggle('active', i < fbRating);
-    }
+/* Update init */
+var origInit=window.onload;
+document.addEventListener('DOMContentLoaded',function(){
+  if(window.renderProfile)renderProfile();
+  if(window.loadHome)loadHome();
+  if(window.loadMemberStatus)loadMemberStatus();
 });
-
-async function submitFeedback() {
-    if (!fbRating) { showToast('请选择评分'); return; }
-    closeFeedback();
-    try {
-        var result = await api('/api/feedback', {
-            method: 'POST',
-            body: {
-                treatment_id: currentTreatmentId,
-                rating: fbRating,
-                efficacy: document.getElementById('fbEffect').value,
-                description: document.getElementById('fbDesc').value,
-                course_days: parseInt(document.getElementById('fbDays').value) || 0
-            }
-        });
-        showToast(result.message || '反馈提交成功！');
-        loadFeedback(currentTreatmentId);
-    } catch(e) { showToast('提交失败: ' + e.message); }
-}
-
-async function loadFeedback(tid) {
-    try {
-        var fb = await api('/api/feedback/' + tid);
-        var el = document.getElementById('feedbackSection');
-        var h = [];
-        h.push('<div class="section-title" style="padding:10px 0 8px">💬 疗效反馈 (' + fb.total + ')</div>');
-        if (fb.total > 0) {
-            h.push('<div class="fb-summary"><div class="fb-stats"><div class="fb-avg">' + fb.avg_rating + ' <small>/5</small></div><div class="fb-bar" style="flex:1">');
-            for (var s = 5; s >= 1; s--) {
-                var cnt = fb.distribution ? (fb.distribution[String(s)] || 0) : 0;
-                var pct = fb.total > 0 ? (cnt / fb.total * 100) : 0;
-                h.push('<div class="fb-bar-item"><span>' + s + '星</span><div class="fb-bar-track"><div class="fb-bar-fill" style="width:' + pct + '%"></div></div><span>' + cnt + '</span></div>');
-            }
-            h.push('</div></div></div>');
-            if (fb.list && fb.list.length) {
-                for (var i = 0; i < fb.list.length; i++) {
-                    var r = fb.list[i];
-                    var stars = '';
-                    for (var si = 0; si < 5; si++) stars += si < r.rating ? '⭐' : '☆';
-                    h.push('<div class="fb-item"><div class="fb-stars">' + stars + '</div><div class="fb-text">' + esc(r.description || '') + '</div><div class="fb-meta"><span>' + esc(r.username || '匿名') + '</span><span>' + esc(r.created_at || '') + '</span><span>🏆' + esc(r.efficacy || '') + '</span><span>' + esc(r.course_days || 0) + '天</span></div></div>');
-                }
-            }
-        } else {
-            h.push('<div style="text-align:center;padding:20px;color:#bbb;font-size:13px">暂无疗效反馈</div>');
-        }
-        if (token && currentTreatmentId) {
-            h.push('<div style="text-align:center;padding:10px"><button class="pay-btn sm" style="background:#f0ebe6;color:#5a3e36" onclick="openFeedback()">📝 提交疗效反馈</button></div>');
-        }
-        el.innerHTML = h.join('');
-    } catch(e) {}
-}
-
-// === FAVORITE ===
-async function toggleFav() {
-    if (!currentTreatmentId) return;
-    try {
-        var result = await api('/api/favorites/toggle', { method: 'POST', body: { treatment_id: currentTreatmentId } });
-        document.getElementById('favBtn').textContent = result.favorited ? '❤️' : '🤍';
-        showToast(result.message || '');
-    } catch(e) { showToast('操作失败'); }
-}
-
-async function renderFavs() {
-    try {
-        var favs = await api('/api/favorites');
-        var el = document.getElementById('favList');
-        if (!favs.length) {
-            el.innerHTML = '<div style="text-align:center;padding:40px 20px;color:#bbb;font-size:14px">❤️ 还没有收藏的内容<br><span style="font-size:12px">浏览治疗方案时点击🤍即可收藏</span></div>';
-            showPage('pageFav'); return;
-        }
-        var h = [];
-        for (var i = 0; i < favs.length; i++) {
-            var t = favs[i];
-            var tags = '';
-            for (var j = 0; j < (t.types || []).length; j++) tags += '<span class="tag">' + t.types[j] + '</span>';
-            h.push('<div class="treatment-card" onclick="showTreatment(' + t.treatment_id + ')"><div class="tc-header"><div class="tc-title">' + t.title + '</div><div class="tc-price">¥' + t.price + '</div></div><div class="tc-tags">' + tags + '</div><div class="tc-meta"><span>⭐' + t.rating + '</span></div></div>');
-        }
-        el.innerHTML = h.join('');
-        showPage('pageFav');
-    } catch(e) { showToast('加载失败'); }
-}
-
-// === PURCHASE ===
-function openPay() { document.getElementById('payModal').classList.add('show'); }
-function closePay() { document.getElementById('payModal').classList.remove('show'); }
-
-async function doPay() {
-    closePay();
-    try {
-        var result = await api('/api/purchase', { method: 'POST', body: { treatment_id: currentTreatmentId } });
-        showToast('✅ ' + (result.message || '购买成功！'));
-        showTreatment(currentTreatmentId);
-    } catch(e) { showToast('购买失败: ' + e.message); }
-}
-
-// === AUTH ===
-function switchToLogin() {
-    document.getElementById('authTitle').textContent = '登录';
-    document.getElementById('authSubmitBtn').textContent = '登录';
-    document.getElementById('authToggle').innerHTML = '还没有账号？<a href="javascript:switchToRegister()">立即注册</a>';
-    document.getElementById('authIsRegister').value = 'false';
-    document.getElementById('authUsernameRow').style.display = 'none';
-    showPage('pageAuth');
-}
-
-function switchToRegister() {
-    document.getElementById('authTitle').textContent = '注册';
-    document.getElementById('authSubmitBtn').textContent = '注册';
-    document.getElementById('authToggle').innerHTML = '已有账号？<a href="javascript:switchToLogin()">立即登录</a>';
-    document.getElementById('authIsRegister').value = 'true';
-    document.getElementById('authUsernameRow').style.display = 'block';
-    showPage('pageAuth');
-}
-
-async function submitAuth() {
-    var isRegister = document.getElementById('authIsRegister').value === 'true';
-    var phone = document.getElementById('authPhone').value.trim();
-    var password = document.getElementById('authPassword').value;
-    var username = document.getElementById('authUsername') ? document.getElementById('authUsername').value.trim() : '';
-    if (!phone || !password) { showToast('请填写手机号和密码'); return; }
-    try {
-        var result;
-        if (isRegister) {
-            result = await api('/api/auth/register', { method: 'POST', body: { phone: phone, password: password, username: username || '' } });
-        } else {
-            result = await api('/api/auth/login', { method: 'POST', body: { phone: phone, password: password } });
-        }
-        token = result.token;
-        user = result.user;
-        localStorage.setItem('token', token);
-        localStorage.setItem('user', JSON.stringify(user));
-        showToast(isRegister ? '注册成功！' : '登录成功！');
-        renderProfile();
-        showPage('pageProfile');
-    } catch(e) { showToast(e.message); }
-}
-
-function logout() {
-    localStorage.removeItem('token');
-    localStorage.removeItem('user');
-    token = '';
-    user = null;
-    showToast('已退出登录');
-    renderProfile();
-    showPage('pageProfile');
-}
-
-// === UPLOAD ===
-function togglePaste() {
-    var ta = document.getElementById('pasteArea');
-    ta.style.display = ta.style.display === 'block' ? 'none' : 'block';
-    if (ta.style.display === 'block') ta.focus();
-}
-
-function handleFiles() {
-    showToast('📤 文件上传功能（请使用粘贴文字上传）');
-}
-
-async function submitPaste() {
-    var ta = document.getElementById('pasteArea');
-    var content = ta.value.trim();
-    if (!content || content.length < 10) { showToast('请输入更多内容'); return; }
-    try {
-        var result = await api('/api/upload', { method: 'POST', body: { content: content } });
-        showToast('📤 上传成功，AI正在处理...');
-        ta.value = '';
-        ta.style.display = 'none';
-        loadUploads();
-    } catch(e) { showToast('上传失败: ' + e.message); }
-}
-
-async function loadUploads() {
-    try {
-        var uploads = await api('/api/uploads');
-        var el = document.getElementById('uploadHistory');
-        if (!el) return;
-        if (!uploads.length) {
-            el.innerHTML = '<div style="text-align:center;padding:30px;color:#bbb;font-size:13px">暂无上传记录</div>';
-            return;
-        }
-        var h = [];
-        for (var i = 0; i < uploads.length; i++) {
-            var r = uploads[i];
-            var icon = r.status === 'approved' ? '✅' : r.status === 'rejected' ? '❌' : '⏳';
-            var badgeClass = r.status === 'approved' ? 'badge-approved' : r.status === 'rejected' ? 'badge-rejected' : 'badge-pending';
-            var label = r.status === 'approved' ? '已发布' : r.status === 'rejected' ? '已驳回' : '待审核';
-            var title = (r.ai_result && r.ai_result.title) ? r.ai_result.title : '上传内容';
-            h.push('<div class="treatment-card" style="padding:12px 14px"><div style="display:flex;align-items:center;gap:10px"><div style="font-size:22px">' + icon + '</div><div style="flex:1"><div style="font-size:13px;font-weight:500">' + esc(title) + '</div><div style="font-size:11px;color:#999">' + esc(r.created_at || '') + '</div></div><span class="badge ' + badgeClass + '">' + label + '</span></div></div>');
-        }
-        el.innerHTML = h.join('');
-    } catch(e) {}
-}
-
-// === PROFILE ===
-function renderProfile() {
-    updateUser();
-    var loginDiv = document.getElementById('profileLogin');
-    var contentDiv = document.getElementById('profileContent');
-    if (user && user.id) {
-        if (loginDiv) loginDiv.style.display = 'none';
-        if (contentDiv) {
-            contentDiv.style.display = 'block';
-            document.getElementById('profileName').textContent = user.username || '用户';
-            document.getElementById('profilePoints').textContent = user.points || 0;
-            document.getElementById('profileBalance').textContent = '¥' + (user.balance && user.balance.toFixed ? user.balance.toFixed(2) : (user.balance || '0.00'));
-            document.getElementById('profileRole').textContent = user.role === 'admin' ? '管理员' : '普通用户';
-        }
-    } else {
-        if (loginDiv) loginDiv.style.display = 'block';
-        if (contentDiv) contentDiv.style.display = 'none';
-    }
-}
-
-// === ADMIN ===
-async function loadAdmin() {
-    try {
-        updateUser();
-        if (!user || user.role !== 'admin') {
-            showToast('需要管理员权限');
-            showPage('pageProfile');
-            return;
-        }
-        var pending = await api('/api/admin/pending?status=pending');
-        var el = document.getElementById('adminPendingList');
-        if (!pending.length) {
-            el.innerHTML = '<div style="text-align:center;padding:30px;color:#bbb">暂无待审核内容</div>';
-            return;
-        }
-        var h = [];
-        for (var i = 0; i < pending.length; i++) {
-            var r = pending[i];
-            var title = (r.ai_result && r.ai_result.title) ? r.ai_result.title : '待审核内容';
-            h.push('<div class="treatment-card"><div class="tc-header"><div class="tc-title">' + esc(title) + '</div></div>' +
-                '<div class="tc-meta"><span>上传者: ' + esc(r.uploader_name || '') + '</span><span>' + esc(r.created_at || '') + '</span></div>' +
-                '<div style="margin-top:8px;font-size:12px;color:#555;max-height:80px;overflow:hidden">' + esc((r.content || '').substring(0, 200)) + '</div>' +
-                '<div style="display:flex;gap:8px;margin-top:10px">' +
-                '<button class="pay-btn sm" style="background:#e8f5e9;color:#2e7d32" onclick="approveUpload(' + r.id + ')">✅ 通过</button>' +
-                '<button class="pay-btn sm" style="background:#ffebee;color:#c62828" onclick="rejectUpload(' + r.id + ')">❌ 驳回</button></div></div>');
-        }
-        el.innerHTML = h.join('');
-    } catch(e) { showToast('加载失败: ' + e.message); }
-}
-
-async function approveUpload(id) {
-    try {
-        await api('/api/admin/review', { method: 'POST', body: { upload_id: id, action: 'approve' } });
-        showToast('已通过审核');
-        loadAdmin();
-    } catch(e) { showToast('操作失败: ' + e.message); }
-}
-
-async function rejectUpload(id) {
-    var reason = prompt('请输入驳回理由：');
-    if (!reason) return;
-    try {
-        await api('/api/admin/review', { method: 'POST', body: { upload_id: id, action: 'reject', review_note: reason } });
-        showToast('已驳回');
-        loadAdmin();
-    } catch(e) { showToast('操作失败: ' + e.message); }
-}
-
 </script>
-</body>
-</html>
+</body></html>
