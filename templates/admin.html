@@ -105,7 +105,15 @@ body{font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei
       <label>API Key</label>
       <input type="password" id="aiApiKey" placeholder="请输入DeepSeek API Key">
       <label>模型</label>
-      <input type="text" id="aiModel" value="deepseek-chat">
+      <div style="display:flex;gap:8px;align-items:center">
+        <input type="text" id="aiModel" value="deepseek-chat" style="flex:1" placeholder="选择或输入模型名称">
+        <button class="btn-ghost btn-sm" onclick="getModels()" style="white-space:nowrap;padding:8px 12px;font-size:12px">获取模型列表</button>
+      </div>
+      <div id="modelListContainer" style="display:none;margin-top:6px">
+        <select id="aiModelSelect" style="width:100%;padding:8px 12px;border:1px solid #ddd;border-radius:6px;font-size:13px;font-family:inherit" onchange="document.getElementById('aiModel').value=this.value">
+          <option value="">选择模型...</option>
+        </select>
+      </div>
       <label>API 地址</label>
       <input type="text" id="aiApiUrl" value="https://api.deepseek.com/v1/chat/completions">
       <label>
@@ -213,6 +221,43 @@ async function saveAdminSettings(){
     var r=await api('/api/admin/member/settings',{method:'POST',body:{annual_fee:parseFloat(document.getElementById('memberFee').value),free_duration_days:parseInt(document.getElementById('memberDays').value)}});
     t(r.message);
   }catch(e){t(e.message);}
+}
+
+/* AI Settings */
+async function loadAISettings(){
+  try{
+    var s=await api('/api/admin/ai/settings');
+    document.getElementById('aiApiKey').value=s.api_key||'';
+    document.getElementById('aiModel').value=s.model||'deepseek-chat';
+    document.getElementById('aiApiUrl').value=s.api_url||'https://api.deepseek.com/v1/chat/completions';
+    document.getElementById('aiAutoApprove').checked=!!s.auto_approve;
+  }catch(e){}
+}
+async function saveAISettings(){
+  try{
+    var r=await api('/api/admin/ai/settings',{method:'POST',body:{api_key:document.getElementById('aiApiKey').value,model:document.getElementById('aiModel').value,api_url:document.getElementById('aiApiUrl').value,auto_approve:document.getElementById('aiAutoApprove').checked}});
+    t('保存成功！AI设置已更新');
+  }catch(e){t(e.message);}
+}
+async function getModels(){
+  var key=document.getElementById('aiApiKey').value.trim();
+  var url=document.getElementById('aiApiUrl').value.trim()||'https://api.deepseek.com/v1';
+  if(!key){t('请先输入API Key');return;}
+  var baseUrl=url.replace('/chat/completions','').replace('/v1','')+'/v1';
+  try{
+    var resp=await fetch(baseUrl+'/models',{headers:{'Authorization':'Bearer '+key}});
+    var data=await resp.json();
+    if(!resp.ok) throw new Error(data.error?.message||'获取失败');
+    var sel=document.getElementById('aiModelSelect');
+    sel.innerHTML='<option value="">选择模型...</option>';
+    for(var i=0;i<data.data.length;i++){
+      var m=data.data[i];
+      var id=m.id||m;
+      sel.innerHTML+='<option value="'+esc(id)+'">'+esc(id)+'</option>';
+    }
+    document.getElementById('modelListContainer').style.display='block';
+    t('已获取 '+data.data.length+' 个模型，请选择');
+  }catch(e){t('获取模型列表失败: '+e.message);}
 }
 
 /* Applications */
