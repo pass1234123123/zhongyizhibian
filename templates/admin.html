@@ -35,6 +35,8 @@ body{font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei
 .btn-approve{background:#E8F5E9;color:#2E7D32;border:none;padding:8px 20px;border-radius:20px;font-size:13px;cursor:pointer;font-family:inherit}
 .btn-reject{background:#FFEBEE;color:#C62828;border:none;padding:8px 20px;border-radius:20px;font-size:13px;cursor:pointer;font-family:inherit}
 .btn-view{background:#E3F2FD;color:#1565C0;border:none;padding:8px 20px;border-radius:20px;font-size:13px;cursor:pointer;font-family:inherit}
+.btn-edit-ai{background:#FFF8E1;color:#F57F17;border:none;padding:8px 20px;border-radius:20px;font-size:13px;cursor:pointer;font-family:inherit}
+.btn-import{background:#E8F5E9;color:#1B5E20;border:none;padding:8px 20px;border-radius:20px;font-size:13px;cursor:pointer;font-family:inherit}
 .btn-primary{background:var(--primary);color:#fff;border:none;padding:10px 24px;border-radius:20px;font-size:14px;cursor:pointer;font-family:inherit}
 
 .settings-group{background:var(--card);border-radius:var(--radius);padding:16px;margin-bottom:12px;box-shadow:var(--shadow)}
@@ -196,7 +198,7 @@ async function loadPending(){
     var h=[];
     for(var i=0;i<pending.length;i++){
       var r=pending[i];
-      h.push('<div class="admin-card"><div class="card-title">'+esc((r.ai_result&&r.ai_result.title)||'待审核内容')+'</div><div class="card-meta">上传者: '+esc(r.uploader_name||'')+' | '+esc(r.created_at||'')+'</div><div class="card-body">'+esc((r.content||'').substring(0,200))+'</div><div class="card-actions"><button class="btn-view" onclick="reviewView('+r.id+')">🔍 查阅</button><button class="btn-approve" onclick="approve('+r.id+')">通过</button><button class="btn-reject" onclick="reject('+r.id+')">驳回</button></div></div>');
+      h.push('<div class="admin-card"><div class="card-title">'+esc((r.ai_result&&r.ai_result.title)||'待审核内容')+'</div><div class="card-meta">上传者: '+esc(r.uploader_name||'')+' | '+esc(r.created_at||'')+'</div><div class="card-body">'+esc((r.content||'').substring(0,200))+'</div><div class="card-actions"><button class="btn-view" onclick="reviewView('+r.id+')">🔍 查阅</button><button class="btn-edit-ai" onclick="editAI('+r.id+')">✏️ AI编辑</button><button class="btn-import" onclick="importCheck('+r.id+')">📥 资料入库</button><button class="btn-approve" onclick="approve('+r.id+')">通过</button><button class="btn-reject" onclick="reject('+r.id+')">驳回</button></div></div>');
     }
     el.innerHTML=h.join('');
   }catch(e){el.innerHTML='<div class="empty-state">加载失败</div>';}
@@ -309,6 +311,106 @@ function reviewView(id){
 }
 function closeModal(){document.getElementById('modalOverlay').classList.remove('show');}
 
+
+/* AI Edit & Import */
+var _currentImportId = 0;
+function editAI(id){
+  _currentImportId=id;
+  var list=window._pendingList||[];
+  var r=null;
+  for(var i=0;i<list.length;i++){if(list[i].id==id){r=list[i];break;}}
+  if(!r){t('数据未找到');return;}
+  var ai=r.ai_result||{};
+  document.getElementById('aiEditId').value=id;
+  document.getElementById('aiEditTitle').value=ai.title||'';
+  document.getElementById('aiEditDisease').value=ai.disease||'';
+  document.getElementById('aiEditCategory').value=ai.category||'';
+  document.getElementById('aiEditTypes').value=(ai.types||[]).join(',');
+  document.getElementById('aiEditPreview').value=ai.preview||'';
+  document.getElementById('aiEditContent').value=ai.full_content||'';
+  document.getElementById('aiEditModal').classList.add('show');
+}
+function closeAIModal(){document.getElementById('aiEditModal').classList.remove('show');}
+async function saveAIEdit(){
+  var id=parseInt(document.getElementById('aiEditId').value);
+  try{
+    var r=await api('/api/admin/upload/edit-ai',{method:'POST',body:{
+      upload_id:id,
+      ai_title:document.getElementById('aiEditTitle').value,
+      ai_disease:document.getElementById('aiEditDisease').value,
+      ai_category:document.getElementById('aiEditCategory').value,
+      ai_types:document.getElementById('aiEditTypes').value.split(',').map(function(s){return s.trim();}).filter(function(s){return s;}),
+      ai_preview:document.getElementById('aiEditPreview').value,
+      ai_full_content:document.getElementById('aiEditContent').value
+    }});
+    t(r.message);
+    closeAIModal();
+    loadPending();
+  }catch(e){t(e.message);}
+}
+async function importCheck(id){
+  _currentImportId=id;
+  try{
+    var r=await api('/api/admin/upload/check-duplicates',{method:'POST',body:{upload_id:id}});
+    var dup=r.duplicates||[];
+    var html='<div id="importDupList"></div><div id="importAction" style="text-align:center;margin-top:16px"></div>';
+    document.getElementById('importContent').innerHTML=html;
+    if(dup.length){
+      var dl='<div class="modal-section" style="background:#FFF3E0"><div class="section-label">⚠️ 发现可能重复的数据</div><div style="font-size:13px;max-height:200px;overflow-y:auto">';
+      for(var i=0;i<dup.length;i++){
+        dl+='<div style="padding:8px;margin-bottom:4px;background:#fff;border-radius:6px;border-left:3px solid #FF9800"><div style="font-weight:500">'+esc(dup[i].title)+'</div><div style="font-size:11px;color:#666">'+esc(dup[i].match)+' | '+esc(dup[i].preview)+'</div></div>';
+      }
+      dl+='</div></div>';
+      document.getElementById('importDupList').innerHTML=dl;
+      document.getElementById('importAction').innerHTML='<p style="font-size:13px;color:#666;margin:8px 0">以上内容与新上传的数据相似，是否继续入库？</p><button class="btn-import" onclick="confirmImport('+id+')" style="padding:10px 32px">继续入库</button><button class="btn-reject" onclick="closeImportModal()" style="margin-left:8px;padding:10px 24px">取消</button>';
+    } else {
+      document.getElementById('importDupList').innerHTML='<div class="modal-section" style="background:#E8F5E9"><div class="section-label">✔️ 未发现重复数据</div></div>';
+      document.getElementById('importAction').innerHTML='<button class="btn-import" onclick="confirmImport('+id+')" style="padding:10px 32px">确定入库</button><button class="btn-reject" onclick="closeImportModal()" style="margin-left:8px;padding:10px 24px">取消</button>';
+    }
+    document.getElementById('importModal').classList.add('show');
+  }catch(e){t(e.message);}
+}
+function closeImportModal(){document.getElementById('importModal').classList.remove('show');}
+async function confirmImport(id){
+  try{
+    var r=await api('/api/admin/upload/import',{method:'POST',body:{upload_id:id}});
+    t(r.message);
+    closeImportModal();
+    loadPending();
+  }catch(e){t(e.message);}
+}
+
 </script>
 <div class="modal-overlay" id="modalOverlay" onclick="if(event.target==this)closeModal()"><div class="modal-box" id="modalContent"></div></div>
+
+  <!-- AI Edit Modal -->
+  <div class="modal-overlay" id="aiEditModal" onclick="if(event.target==this)closeAIModal()">
+    <div class="modal-box" style="max-width:700px">
+      <button class="modal-close" onclick="closeAIModal()">x</button>
+      <div class="modal-title">✏️ AI 内容编辑</div>
+      <div class="settings-group">
+        <label>标题</label><input type="text" id="aiEditTitle" style="width:100%;padding:8px 12px;border:1px solid #ddd;border-radius:6px;font-size:14px;font-family:inherit;box-sizing:border-box">
+        <label>疾病</label><input type="text" id="aiEditDisease" style="width:100%;padding:8px 12px;border:1px solid #ddd;border-radius:6px;font-size:14px;font-family:inherit;box-sizing:border-box">
+        <label>分类</label><input type="text" id="aiEditCategory" style="width:100%;padding:8px 12px;border:1px solid #ddd;border-radius:6px;font-size:14px;font-family:inherit;box-sizing:border-box">
+        <label>治疗类型（逗号分隔）</label><input type="text" id="aiEditTypes" placeholder="例如: 方剂内服, 针灸" style="width:100%;padding:8px 12px;border:1px solid #ddd;border-radius:6px;font-size:14px;font-family:inherit;box-sizing:border-box">
+        <label>简介/预览</label><textarea id="aiEditPreview" rows="3" style="width:100%;padding:8px 12px;border:1px solid #ddd;border-radius:6px;font-size:14px;font-family:inherit;resize:vertical;box-sizing:border-box"></textarea>
+        <label>完整内容</label><textarea id="aiEditContent" rows="6" style="width:100%;padding:8px 12px;border:1px solid #ddd;border-radius:6px;font-size:14px;font-family:inherit;resize:vertical;box-sizing:border-box"></textarea>
+        <input type="hidden" id="aiEditId" value="">
+        <div style="text-align:center;margin-top:12px">
+          <button class="btn-primary" onclick="saveAIEdit()">保存修改</button>
+          <button class="btn-reject" onclick="closeAIModal()" style="margin-left:8px">取消</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Import Confirm Modal -->
+  <div class="modal-overlay" id="importModal" onclick="if(event.target==this)closeImportModal()">
+    <div class="modal-box" style="max-width:600px">
+      <button class="modal-close" onclick="closeImportModal()">x</button>
+      <div class="modal-title">📥 资料入库</div>
+      <div id="importContent"></div>
+    </div>
+  </div>
+
 </body></html>
