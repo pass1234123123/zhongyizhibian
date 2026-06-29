@@ -191,6 +191,7 @@ async function loadPending(){
   var el=document.getElementById('pendingList');
   try{
     var pending=await api('/api/admin/pending?status=pending');
+    window._pendingList=pending;
     if(!pending.length){el.innerHTML='<div class="empty-state">暂无待审核内容</div>';return;}
     var h=[];
     for(var i=0;i<pending.length;i++){
@@ -291,7 +292,7 @@ function reviewView(id){
   var list=window._pendingList||[];
   var r=null;
   for(var i=0;i<list.length;i++){if(list[i].id==id){r=list[i];break;}}
-  if(!r){showToast('数据未找到');return;}
+  if(!r){t('数据未找到');return;}
   var title=(r.ai_result&&r.ai_result.title)||'待审核内容';
   var aiContent=JSON.stringify(r.ai_result||{},null,2);
   var content=r.content||'(无文字内容)';
