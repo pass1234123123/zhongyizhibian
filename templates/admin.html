@@ -291,24 +291,141 @@ async function appApprove(id){try{await api('/api/admin/member/applications',{me
 async function appReject(id){var r=prompt('驳回理由：');if(!r)return;try{await api('/api/admin/member/applications',{method:'POST',body:{application_id:id,action:'reject',review_note:r}});t('已驳回');loadApplications();}catch(e){t(e.message);}}
 
 function reviewView(id){
+  _curRvId=id;
   var list=window._pendingList||[];
   var r=null;
   for(var i=0;i<list.length;i++){if(list[i].id==id){r=list[i];break;}}
-  if(!r){t('数据未找到');return;}
-  var title=(r.ai_result&&r.ai_result.title)||'待审核内容';
-  var aiContent=JSON.stringify(r.ai_result||{},null,2);
-  var content=r.content||'(无文字内容)';
+  if(!r){t('\u6570\u636e\u672a\u627e\u5230');return;}
+  var ai=r.ai_result||{};
+  var treats=ai.treatments||(ai.title?[ai]:[]);
+  var content=r.content||'(\u65e0\u6587\u5b57\u5185\u5bb9)';
   var files=r.file_names||'';
-  var fileHtml=files?'<div class="modal-section"><div class="section-label">上传文件</div><div class="section-body">'+esc(files.replace(/,/g,String.fromCharCode(10)))+'</div></div>':'';
-  var html='<div class="modal-title">'+esc(title)+'</div>'
-    +'<div class="modal-section"><div class="section-label">原文内容</div><div class="section-body">'+esc(content)+'</div></div>'
+  var fileHtml=files?'<div class="modal-section"><div class="section-label">\u4e0a\u4f20\u6587\u4ef6</div><div class="section-body">'+esc(files.replace(/,/g,String.fromCharCode(10)))+'</div></div>':'';
+  var tabs='<div style="display:flex;border-bottom:1px solid #eee;margin-bottom:4px">'
+    +'<span class="review-tab active" onclick="showRvTab(this,'+'file'+')">\U0001f4c4 \u539f\u6587\u4ef6</span>'
+    +'<span class="review-tab" onclick="showRvTab(this,'+'ai'+')">\u2728 AI\u7f16\u8f91</span>'
+    +'<span class="review-tab" onclick="showRvTab(this,'+'import'+')">\U0001f4e5 \u5165\u5e93</span></div>';
+  var tab1='<div class="review-panel show" id="rvTabFile">'
+    +'<div class="modal-section"><div class="section-label">\u539f\u6587\u5185\u5bb9</div><div class="section-body" style="max-height:400px">'+esc(content)+'</div></div>'
     +fileHtml
-    +'<div class="modal-section"><div class="section-label">上传者 / 时间</div><div class="section-body">'+esc(r.uploader_name||'')+' | '+esc(r.created_at||'')+'</div></div>'
-    +'<div class="modal-section"><div class="section-label">AI 提取结果</div><div class="section-body json-view">'+esc(aiContent)+'</div></div>'
-    +'<div style="text-align:center;margin-top:12px"><button class="btn-primary" onclick="closeModal()">关闭</button></div>';
+    +'<div class="modal-section"><div class="section-label">\u4e0a\u4f20\u8005 / \u65f6\u95f4</div><div class="section-body">'+esc(r.uploader_name||'')+' | '+esc(r.created_at||'')+'</div></div>'
+    +'<div class="review-actions"><button class="btn-edit-ai" onclick="showRvTab(document.querySelector('+'.review-tab:nth-child(2)'+'),'+'ai'+')">\u27a1\ufe0f \u786e\u8ba4\u65e0\u8bef\uff0c\u8fdb\u5165AI\u7f16\u8f91</button></div></div>';
+  var tab2='<div class="review-panel" id="rvTabAI" style="max-height:500px;overflow-y:auto">';
+  if(treats.length){
+    tab2+='<table class="review-table"><tr><th>#</th><th>\u6807\u9898</th><th>\u75be\u75c5</th><th>\u5206\u7c7b</th><th>\u7597\u6cd5\u7c7b\u578b</th><th>\u65b9\u5242/\u7a74\u4f4d</th></tr>';
+    for(var i=0;i<treats.length;i++){
+      var t=treats[i];
+      var types=(t.types||[]).join(', ');
+      var fc=t.formulas?t.formulas.length+' \u65b9':'';
+      var ac=t.acupoints?t.acupoints.length+' \u7a74':'';
+      tab2+='<tr><td>'+(i+1)+'</td><td>'+esc(t.title||'')+'</td><td>'+esc(t.disease||'')+'</td><td>'+esc(t.category||'')+'</td><td>'+esc(types)+'</td><td>'+fc+ac+'</td></tr>';
+    }
+    tab2+='</table>';
+  } else {
+    tab2+='<div class="empty-state" style="padding:20px">AI\u672a\u63d0\u53d6\u5230\u7597\u7a0b\u6570\u636e</div>';
+  }
+  tab2+='<div class="review-actions"><button class="btn-edit-ai" onclick="editRvAI()">\u270f\ufe0f \u7f16\u8f91\u6570\u636e</button><button class="btn-import" onclick="rvCheckImport()">\U0001f4e5 \u8d44\u6599\u5165\u5e93</button></div></div>';
+  var tab3='<div class="review-panel" id="rvTabImport"><div id="rvImportContent"></div></div>';
+  var html='<div class="modal-title">\U0001f50d \u5ba1\u6838\u7ba1\u7406</div>'+tabs+tab1+tab2+tab3
+    +'<div class="review-actions"><button class="btn-approve" onclick="rvApprove()">\u901a\u8fc7</button><button class="btn-reject" onclick="rvReject()">\u9a73\u56de</button></div>';
   document.getElementById('modalContent').innerHTML=html;
   document.getElementById('modalOverlay').classList.add('show');
 }
+function showRvTab(el,tab){
+  document.querySelectorAll('.review-tab').forEach(function(t){t.classList.remove('active');});
+  el.classList.add('active');
+  document.querySelectorAll('.review-panel').forEach(function(p){p.classList.remove('show');});
+  var tabId='rvTab'+tab.charAt(0).toUpperCase()+tab.slice(1);
+  document.getElementById(tabId).classList.add('show');
+  if(tab==='import') rvCheckImport();
+}
+var _curRvId=0, _rvDupIds=[];
+function editRvAI(){
+  var list=window._pendingList||[]; var r=null;
+  for(var i=0;i<list.length;i++){if(list[i].id==_curRvId){r=list[i];break;}}
+  if(!r){t('\u6570\u636e\u672a\u627e\u5230');return;}
+  var ai=r.ai_result||{};
+  document.getElementById('aiEditId').value=_curRvId;
+  document.getElementById('aiEditTitle').value=ai.title||'';
+  document.getElementById('aiEditDisease').value=ai.disease||'';
+  document.getElementById('aiEditCategory').value=ai.category||'';
+  document.getElementById('aiEditTypes').value=(ai.types||[]).join(',');
+  document.getElementById('aiEditPreview').value=ai.preview||'';
+  document.getElementById('aiEditContent').value=ai.full_content||'';
+  document.getElementById('aiEditModal').classList.add('show');
+}
+async function saveRvAIEdit(){
+  var id=parseInt(document.getElementById('aiEditId').value);
+  try{
+    await api('/api/admin/upload/edit-ai',{method:'POST',body:{
+      upload_id:id, ai_title:document.getElementById('aiEditTitle').value,
+      ai_disease:document.getElementById('aiEditDisease').value,
+      ai_category:document.getElementById('aiEditCategory').value,
+      ai_types:document.getElementById('aiEditTypes').value.split(',').map(function(s){return s.trim();}).filter(function(s){return s;}),
+      ai_preview:document.getElementById('aiEditPreview').value,
+      ai_full_content:document.getElementById('aiEditContent').value
+    }});
+    t('\u4fdd\u5b58\u6210\u529f'); closeAIModal(); loadPending(); reviewView(id);
+  }catch(e){t(e.message);}
+}
+function rvCheckImport(){rvCheckImportImpl();}
+async function rvCheckImportImpl(){
+  try{
+    var r=await api('/api/admin/upload/check-duplicates',{method:'POST',body:{upload_id:_curRvId}});
+    var dups=r.duplicates||[];
+    var list=window._pendingList||[]; var item=null;
+    for(var i=0;i<list.length;i++){if(list[i].id==_curRvId){item=list[i];break;}}
+    var ai=(item&&item.ai_result)||{};
+    var treats=ai.treatments||(ai.title?[ai]:[]);
+    var html='';
+    if(treats.length){
+      html+='<div class="modal-section" style="background:#E3F2FD"><div class="section-label">\U0001f4cb \u5373\u5c06\u5165\u5e93\u7684\u5185\u5bb9</div><div style="font-size:13px;max-height:250px;overflow-y:auto">';
+      for(var i=0;i<treats.length;i++){
+        var t=treats[i];
+        html+='<div style="padding:8px;margin-bottom:4px;background:#fff;border-radius:6px;border-left:3px solid #1565C0"><div style="font-weight:500">'+esc(t.title||'')+'</div><div style="font-size:11px;color:#666">'+esc(t.disease||'')+' | '+esc(t.category||'')+' | '+(t.formulas?t.formulas.length+'\u65b9':'')+(t.acupoints?t.acupoints.length+'\u7a74':'')+'</div></div>';
+      }
+      html+='</div></div>';
+    }
+    _rvDupIds=[];
+    if(dups.length){
+      var dl='<div class="modal-section" style="background:#FFF3E0"><div class="section-label">\u26a0\ufe0f \u53d1\u73b0\u53ef\u80fd\u91cd\u590d\u7684\u6570\u636e</div><div style="font-size:13px;max-height:200px;overflow-y:auto">';
+      for(var i=0;i<dups.length;i++){
+        var cid='dup_'+(dups[i].id||i);
+        dl+='<div style="padding:8px;margin-bottom:4px;background:#fff;border-radius:6px;border-left:3px solid #FF9800"><label><input type="checkbox" id="'+cid+'" checked onchange="rvDupToggle(this)"> <strong>'+esc(dups[i].title)+'</strong></label><div style="font-size:11px;color:#666;margin-left:22px">'+esc(dups[i].match)+' | '+esc(dups[i].preview)+'</div></div>';
+      }
+      dl+='</div></div>';
+      html+=dl;
+    }
+    html+='<div style="text-align:center;margin-top:16px">';
+    if(dups.length){
+      html+='<button class="btn-import" onclick="rvDoImport(false)" style="padding:10px 24px">继繼入库</button> ';
+      html+='<button class="btn-edit-ai" onclick="rvDoImport(true)" style="padding:10px 24px">去掉相同内容后入库</button>';
+    } else {
+      html+='<button class="btn-import" onclick="rvDoImport(false)" style="padding:10px 24px">确定入库</button>';
+    }
+    html+='</div>';
+    document.getElementById('rvImportContent').innerHTML=html;
+  }catch(e){t(e.message);}
+}
+function rvDupToggle(el){
+  var title=(el.parentNode.textContent||'').trim();
+  if(!el.checked) _rvDupIds.push(title); else _rvDupIds=_rvDupIds.filter(function(s){return s!==title;});
+}
+async function rvDoImport(skipDups){
+  var skipTitles=''; if(skipDups && _rvDupIds.length) skipTitles=_rvDupIds.join(',');
+  try{
+    var r=await api('/api/admin/upload/import',{method:'POST',body:{upload_id:_curRvId,skip_titles:skipTitles}});
+    t(r.message); closeModal(); loadPending();
+  }catch(e){t(e.message);}
+}
+async function rvApprove(){
+  try{await api('/api/admin/review',{method:'POST',body:{upload_id:_curRvId,action:'approve'}});t('\u5df2\u901a\u8fc7');closeModal();loadPending();}catch(e){t(e.message);}
+}
+async function rvReject(){
+  var note=prompt('\u9a73\u56de\u7406\u7531\uff1a');if(!note)return;
+  try{await api('/api/admin/review',{method:'POST',body:{upload_id:_curRvId,action:'reject',review_note:note}});t('\u5df2\u9a73\u56de');closeModal();loadPending();}catch(e){t(e.message);}
+}
+
 function closeModal(){document.getElementById('modalOverlay').classList.remove('show');}
 
 

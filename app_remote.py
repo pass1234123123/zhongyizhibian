@@ -609,7 +609,7 @@ def upload_content():
                         ai_text_for_result = txt[:3000]
                         break
             ai_dict = call_deepseek(ai_text_for_result, api_key, settings.get('model', 'deepseek-chat'), settings.get('api_url', ''))
-            if "error" not in ai_dict:
+            if chr(39)*3+chr(34)*3+chr(34)*3+chr(34)*3+" error+chr(39)*3+chr(34)*3+chr(34)*3+chr(34)*3 not in ai_dict:
                 from ai_processor import process_and_insert
                 db2 = get_db()
                 process_and_insert(db2, ai_dict, user_id)
