@@ -35,7 +35,21 @@ async function submitFeedback() { try { var r=await api("/api/feedback",{method:
 
 // ===== UPLOAD =====
 function togglePaste() { var ta=document.getElementById("pasteArea"); ta.classList.toggle("show"); if(ta.classList.contains("show")) ta.querySelector("textarea").focus(); }
-function handleFiles() { showToast("请使用粘贴文字上传"); }
+function selectFile() { document.getElementById("fileInput").click(); }
+async function uploadFile(input) {
+  var file=input.files[0]; if(!file) return;
+  var fd=new FormData(); fd.append("file",file);
+  try {
+    var headers={}; if(token) headers["Authorization"]="Bearer "+token;
+    var resp=await fetch("/api/upload",{method:"POST",headers:headers,body:fd});
+    var data=await resp.json();
+    if(!resp.ok && data.error) throw new Error(data.error);
+    showToast(data.message||"上传成功");
+    input.value="";
+    if(typeof loadUploads==="function") loadUploads();
+    if(typeof loadMyUploads==="function") loadMyUploads();
+  } catch(e){ showToast("上传失败: "+e.message); }
+}
 async function submitPaste() { var ta=document.getElementById("pasteArea").querySelector("textarea"); var content=ta.value.trim(); if(!content||content.length<10) { showToast("请输入更多内容"); return; } try { var result=await api("/api/upload",{method:"POST",body:{content:content}}); showToast("上传成功，等待审核"); ta.value=""; document.getElementById("pasteArea").classList.remove("show"); loadUploads(); } catch(e) { showToast("上传失败: "+e.message); } }
 async function loadUploads() { var el=document.getElementById("uploadHistory"); if(!el) return; try { var uploads=await api("/api/uploads"); if(!uploads.length) { showEmpty(el,"📤","暂无上传记录",""); return; } var h=[]; for(var i=0;i<uploads.length;i++) { var r=uploads[i]; var icon=r.status==="approved"?"✅":r.status==="rejected"?"❌":"⏳"; var badgeClass=r.status==="approved"?"badge-approved":r.status==="rejected"?"badge-rejected":"badge-pending"; var label=r.status==="approved"?"已发布":r.status==="rejected"?"已驳回":"待审核"; var title=(r.ai_result&&r.ai_result.title)?r.ai_result.title:"上传内容"; h.push("<div class=\"treatment-card\" style=\"padding:12px 14px\"><div style=\"display:flex;align-items:center;gap:10px\"><div style=\"font-size:22px\">"+icon+"</div><div style=\"flex:1\"><div style=\"font-size:13px;font-weight:500\">"+esc(title)+"</div><div style=\"font-size:11px;color:#999\">"+esc(r.created_at||"")+"</div></div><span class=\"badge "+badgeClass+"\">"+label+"</span></div></div>"); } el.innerHTML=h.join(""); } catch(e) {} }
 

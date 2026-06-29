@@ -91,11 +91,17 @@
 <!-- ===== UPLOAD ===== -->
 <div class="page" id="pageUpload">
   <div class="section-header"><h2>上传中心</h2></div>
-  <div class="upload-area" onclick="togglePaste()">
+  <div class="upload-area">
     <div class="upload-icon">📤</div>
-    <div class="upload-text">粘贴中医内容，或拖入文件/图片</div>
-    <div class="upload-sub">支持文字、PDF、图片（AI自动处理）</div>
+    <div class="upload-text">选择内容上传方式</div>
+    <div class="upload-sub">支持文字、Word文档、PDF、图片（AI自动处理）</div>
+    <div class="upload-actions" style="display:flex;gap:12px;margin-top:12px;justify-content:center">
+      <button class="btn-primary btn-sm" onclick="togglePaste()">✏️ 粘贴文字</button>
+      <button class="btn-ghost btn-sm" onclick="selectFile()">📁 选择文件</button>
+    </div>
   </div>
+
+  <input type="file" id="fileInput" accept=".docx,.pdf,.png,.jpg,.jpeg,.gif,.txt" style="display:none" onchange="uploadFile(this)">
   <div class="paste-area" id="pasteArea">
     <textarea placeholder="请粘贴中医治疗方案内容，如方剂组成、针灸穴位、操作方法等。AI会自动提取和归类。"></textarea>
     <div class="paste-actions">
