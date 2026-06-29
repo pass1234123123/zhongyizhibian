@@ -194,7 +194,7 @@ async function loadPending(){
     var h=[];
     for(var i=0;i<pending.length;i++){
       var r=pending[i];
-      h.push('<div class="admin-card"><div class="card-title">'+esc((r.ai_result&&r.ai_result.title)||'待审核内容')+'</div><div class="card-meta">上传者: '+esc(r.uploader_name||'')+' | '+esc(r.created_at||'')+'</div><div class="card-body">'+esc((r.content||'').substring(0,200))+'</div><div class="card-actions"><button class="btn-approve" onclick="approve('+r.id+')">通过</button><button class="btn-reject" onclick="reject('+r.id+')">驳回</button></div></div>');
+      h.push('<div class="admin-card"><div class="card-title">'+esc((r.ai_result&&r.ai_result.title)||'待审核内容')+'</div><div class="card-meta">上传者: '+esc(r.uploader_name||'')+' | '+esc(r.created_at||'')+'</div><div class="card-body">'+esc((r.content||'').substring(0,200))+'</div><div class="card-actions"><button class="btn-ghost btn-sm" onclick="reviewView('+r.id+')">🔍 查阅</button><button class="btn-approve" onclick="approve('+r.id+')">通过</button><button class="btn-reject" onclick="reject('+r.id+')">驳回</button></div></div>');
     }
     el.innerHTML=h.join('');
   }catch(e){el.innerHTML='<div class="empty-state">加载失败</div>';}
