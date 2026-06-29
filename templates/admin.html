@@ -171,7 +171,7 @@ async function adminLogin(){
     document.getElementById('loginScreen').style.display='none';
     document.getElementById('dashboard').style.display='block';
     loadPending();loadMemberSettings();loadMemberList();loadApplications();loadAISettings();
-  }catch(e){err.textContent=e.message;err.style.display='block';}
+  }catch(e){err.textContent=e.message;err.style.display='block';t('登录失败: '+e.message);console.error(e);}
 }
 
 function adminLogout(){token='';document.getElementById('loginScreen').style.display='block';document.getElementById('dashboard').style.display='none';}
