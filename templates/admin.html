@@ -353,7 +353,23 @@ async function importCheck(id){
   try{
     var r=await api('/api/admin/upload/check-duplicates',{method:'POST',body:{upload_id:id}});
     var dup=r.duplicates||[];
-    var html='<div id="importDupList"></div><div id="importAction" style="text-align:center;margin-top:16px"></div>';
+    var list=window._pendingList||[];
+    var item=null;
+    for(var i=0;i<list.length;i++){if(list[i].id==id){item=list[i];break;}}
+    var ai=(item&&item.ai_result)||{};
+    var treats=ai.treatments||(ai.title?[ai]:[]);
+    var html='';
+    if(treats.length){
+      var ph='<div class="modal-section" style="background:#E3F2FD"><div class="section-label">📋 即将入库的内容</div><div style="font-size:13px;max-height:250px;overflow-y:auto">';
+      for(var i=0;i<treats.length;i++){
+        var t=treats[i];
+        var types=(t.types||[]).join(',')||'未指定';
+        ph+='<div style="padding:10px;margin-bottom:6px;background:#fff;border-radius:6px;border-left:3px solid #1565C0"><div style="font-weight:500">'+esc(t.title||'未命名')+'</div><div style="font-size:11px;color:#666;margin-top:2px">疾病: '+esc(t.disease||'')+' 分类: '+esc(t.category||'')+' 类型: '+esc(types)+'</div><div style="font-size:11px;color:#999;margin-top:2px">'+(t.formulas?t.formulas.length+' 个方剂 | ':'')+(t.acupoints?t.acupoints.length+' 个穴位':'')+'</div></div>';
+      }
+      ph+='</div></div>';
+      html+=ph;
+    }
+    html+='<div id="importDupList"></div><div id="importAction" style="text-align:center;margin-top:16px"></div>';
     document.getElementById('importContent').innerHTML=html;
     if(dup.length){
       var dl='<div class="modal-section" style="background:#FFF3E0"><div class="section-label">⚠️ 发现可能重复的数据</div><div style="font-size:13px;max-height:200px;overflow-y:auto">';
