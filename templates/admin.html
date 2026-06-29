@@ -34,6 +34,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei
 
 .btn-approve{background:#E8F5E9;color:#2E7D32;border:none;padding:8px 20px;border-radius:20px;font-size:13px;cursor:pointer;font-family:inherit}
 .btn-reject{background:#FFEBEE;color:#C62828;border:none;padding:8px 20px;border-radius:20px;font-size:13px;cursor:pointer;font-family:inherit}
+.btn-view{background:#E3F2FD;color:#1565C0;border:none;padding:8px 20px;border-radius:20px;font-size:13px;cursor:pointer;font-family:inherit}
 .btn-primary{background:var(--primary);color:#fff;border:none;padding:10px 24px;border-radius:20px;font-size:14px;cursor:pointer;font-family:inherit}
 
 .settings-group{background:var(--card);border-radius:var(--radius);padding:16px;margin-bottom:12px;box-shadow:var(--shadow)}
@@ -116,7 +117,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei
       <label>模型</label>
       <div style="display:flex;gap:8px;align-items:center">
         <input type="text" id="aiModel" value="deepseek-chat" style="flex:1" placeholder="选择或输入模型名称">
-        <button class="btn-ghost btn-sm" onclick="getModels()" style="white-space:nowrap;padding:8px 12px;font-size:12px">获取模型列表</button>
+        <button class="btn-view" onclick="getModels()">获取模型列表</button>
       </div>
       <div id="modelListContainer" style="display:none;margin-top:6px">
         <select id="aiModelSelect" style="width:100%;padding:8px 12px;border:1px solid #ddd;border-radius:6px;font-size:13px;font-family:inherit" onchange="document.getElementById('aiModel').value=this.value">
@@ -194,7 +195,7 @@ async function loadPending(){
     var h=[];
     for(var i=0;i<pending.length;i++){
       var r=pending[i];
-      h.push('<div class="admin-card"><div class="card-title">'+esc((r.ai_result&&r.ai_result.title)||'待审核内容')+'</div><div class="card-meta">上传者: '+esc(r.uploader_name||'')+' | '+esc(r.created_at||'')+'</div><div class="card-body">'+esc((r.content||'').substring(0,200))+'</div><div class="card-actions"><button class="btn-ghost btn-sm" onclick="reviewView('+r.id+')">🔍 查阅</button><button class="btn-approve" onclick="approve('+r.id+')">通过</button><button class="btn-reject" onclick="reject('+r.id+')">驳回</button></div></div>');
+      h.push('<div class="admin-card"><div class="card-title">'+esc((r.ai_result&&r.ai_result.title)||'待审核内容')+'</div><div class="card-meta">上传者: '+esc(r.uploader_name||'')+' | '+esc(r.created_at||'')+'</div><div class="card-body">'+esc((r.content||'').substring(0,200))+'</div><div class="card-actions"><button class="btn-view" onclick="reviewView('+r.id+')">🔍 查阅</button><button class="btn-approve" onclick="approve('+r.id+')">通过</button><button class="btn-reject" onclick="reject('+r.id+')">驳回</button></div></div>');
     }
     el.innerHTML=h.join('');
   }catch(e){el.innerHTML='<div class="empty-state">加载失败</div>';}
