@@ -302,14 +302,14 @@ function reviewView(id){
   var files=r.file_names||'';
   var fileHtml=files?'<div class="modal-section"><div class="section-label">\u4e0a\u4f20\u6587\u4ef6</div><div class="section-body">'+esc(files.replace(/,/g,String.fromCharCode(10)))+'</div></div>':'';
   var tabs='<div style="display:flex;border-bottom:1px solid #eee;margin-bottom:4px">'
-    +'<span class="review-tab active" onclick="showRvTab(this,'file')">\U0001f4c4 \u539f\u6587\u4ef6</span>'
-    +'<span class="review-tab" onclick="showRvTab(this,'ai')">\u2728 AI\u7f16\u8f91</span>'
-    +'<span class="review-tab" onclick="showRvTab(this,'import')">\U0001f4e5 \u5165\u5e93</span></div>';
+    +'<span class="review-tab active" onclick="showRvTab(this,\'file\')">\U0001f4c4 \u539f\u6587\u4ef6</span>'
+    +'<span class="review-tab" onclick="showRvTab(this,\'ai\')">\u2728 AI\u7f16\u8f91</span>'
+    +'<span class="review-tab" onclick="showRvTab(this,\'import\')">\U0001f4e5 \u5165\u5e93</span></div>';
   var tab1='<div class="review-panel show" id="rvTabFile">'
     +'<div class="modal-section"><div class="section-label">\u539f\u6587\u5185\u5bb9</div><div class="section-body" style="max-height:400px">'+esc(content)+'</div></div>'
     +fileHtml
     +'<div class="modal-section"><div class="section-label">\u4e0a\u4f20\u8005 / \u65f6\u95f4</div><div class="section-body">'+esc(r.uploader_name||'')+' | '+esc(r.created_at||'')+'</div></div>'
-    +'<div class="review-actions"><button class="btn-edit-ai" onclick="showRvTab(document.querySelector('.review-tab:nth-child(2)'),'ai')">\u27a1\ufe0f \u786e\u8ba4\u65e0\u8bef\uff0c\u8fdb\u5165AI\u7f16\u8f91</button></div></div>';
+    +'<div class="review-actions"><button class="btn-edit-ai" onclick="showRvTab(document.querySelector(\'.review-tab:nth-child(2)\'),\'ai\')">\u27a1\ufe0f \u786e\u8ba4\u65e0\u8bef\uff0c\u8fdb\u5165AI\u7f16\u8f91</button></div></div>';
   var tab2='<div class="review-panel" id="rvTabAI" style="max-height:500px;overflow-y:auto">';
   if(treats.length){
     tab2+='<table class="review-table"><tr><th>#</th><th>\u6807\u9898</th><th>\u75be\u75c5</th><th>\u5206\u7c7b</th><th>\u7597\u6cd5\u7c7b\u578b</th><th>\u65b9\u5242/\u7a74\u4f4d</th></tr>';
